@@ -1,7 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# # TODO
+# 
+# ## Major
+# - [x] create term-by-document matrix (calculate words frequncies for each term-document pair)
+#  - [ ] check that it's actually correct - especially if we don't map terms to wrong documents
+# - [x] convert term-by-document frequencies to tf-idf (calcualte tf-idf for each term-document pair)
+#  - [ ] check
+# - [ ] we may need actual (numpy?) matrix?
+# - [ ] LSI magic
+# 
+# ### Minor
+# - remove numbers from terms?
+
+# In[224]:
 
 
 import pandas as pd
@@ -14,25 +27,25 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk import RegexpTokenizer
 
 
-# In[4]:
+# In[225]:
 
 
 np.random.seed(42)
 
 
-# In[5]:
+# In[226]:
 
 
 bp_data = pd.read_csv("articles.csv", header=0)
 
 
-# In[6]:
+# In[227]:
 
 
 bp_data.head(1)
 
 
-# In[9]:
+# In[228]:
 
 
 def preprocess_docs(docs, use_lemmatizer=True):
@@ -57,7 +70,8 @@ def preprocess_docs(docs, use_lemmatizer=True):
     else:
         stemmer = SnowballStemmer("english")
     
-    for text in docs.loc[:,"text"]:
+    for row in bp_data.itertuples(index=True, name='Doc'):
+        text = row.text
         text_words = tokenizer.tokenize(text)
         
         if use_lemmatizer:
@@ -65,34 +79,79 @@ def preprocess_docs(docs, use_lemmatizer=True):
         else:
             text_words = [stemmer.stem(word).lower() for word in text_words if word.lower() not in en_stop]
         
-        preproccessed_docs.append(text_words)
+        preproccessed_docs.append({'id': row.Index, 'words': text_words})
     
     return preproccessed_docs
 
 
-# In[10]:
+# In[229]:
 
 
 preproccessed_docs = preprocess_docs(bp_data)
-preproccessed_docs[0]
 
 
-# In[ ]:
+# In[230]:
 
 
-def get_term_by_document(preprocess_docs):
+def get_term_by_document_frequency(preprocessed_docs):
+    document_by_term = {}
     
-    pass
+    for doc_data in preprocessed_docs:
+        doc_id = doc_data['id']
+        doc_words = doc_data['words']
+        
+        document_by_term[doc_id] = {
+            'total_words': len(doc_words)
+        }
+        
+        
+        for word in set(doc_data['words']):
+            document_by_term[doc_id][word] = doc_words.count(word)
+
+    df = pd.DataFrame(document_by_term)
+    
+    return df
 
 
-# In[11]:
+# In[231]:
 
 
-doc_0 = preproccessed_docs[0]
+df_frequency = get_document_by_term_frequency(preproccessed_docs)
 
 
-# In[12]:
+# In[232]:
 
 
-doc_0.count('ai')
+df_frequency
+
+
+# In[233]:
+
+
+def get_tf_idf(df_frequency):
+    df = df_frequency.copy()
+    # tf := word frequency / total frequency
+    df.drop('total_words', inplace=False)[:] /= df.loc['total_words']
+    # idf := log ( len(all_documents) / len(documents_containing_word) )
+
+    corpus_size = df_tf.shape[1]
+    # number of non-zero cols + 1 to avoid division by zero
+    df['doc_frequency'] = df.fillna(0).astype(bool).sum(axis=1) + 1 
+    
+    df['idf'] = np.log( corpus_size / df['doc_frequency'] )
+    # tf-idf := tf * idf
+    _cols = df.columns.difference(['idf', 'doc_frequency'])
+    df[_cols] = df[_cols].multiply(df["idf"], axis="index")
+    
+    df.drop(columns=['doc_frequency', 'idf'], inplace=True)
+    df.drop('total_words', inplace=True)
+    
+    return df
+
+
+# In[235]:
+
+
+df_tf_idf = get_tf_idf(df_frequency)
+df_tf_idf
 
