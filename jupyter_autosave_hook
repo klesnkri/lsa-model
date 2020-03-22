@@ -1,0 +1,2 @@
+#!/bin/bash
+jupyter nbconvert *.ipynb --to="python" --output-dir="generated"

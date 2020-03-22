@@ -1,4 +1,8 @@
-import subprocess
-file_name = 'data.ipynb'
-command = 'jupyter nbconvert {} --to="python" --output-dir="generated"'.format(file_name)
-subprocess.run(command, shell=True, check=True) # throws subprocess.CalledProcessError on fail
+from shutil import copyfile
+
+def enable():
+    copyfile('jupyter_autosave_hook', '.git/hooks/pre-commit')
+    print('Jupyter autosave enabled')
+
+if __name__ == "__main__":
+    enable()
