@@ -136,6 +136,20 @@ df_frequency = get_term_by_document_frequency(preproccessed_docs)
 df_frequency
 
 
+# In[32]:
+
+
+df_frequency['all'] = df_frequency.drop(columns='all').fillna(0).sum(axis=1)
+df_frequency.sort_values(by='all', ascending=False)
+
+
+# In[35]:
+
+
+df_frequency['doc_frequency'] = df_frequency.drop(columns='doc_frequency').fillna(0).astype(bool).sum(axis=1)
+df_frequency.sort_values(by='doc_frequency', ascending=False)
+
+
 # In[11]:
 
 
