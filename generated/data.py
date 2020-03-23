@@ -12,43 +12,45 @@
 # - [ ] LSI magic
 # 
 # ### Minor
-# - remove numbers from terms?
+# - [x] remove numbers from terms - done but not sure if it's good thing to do, maybe it's also important for relevancy of docs,
+# like for example when there is year written?
 
-# In[224]:
+# In[24]:
 
 
 import pandas as pd
 import numpy as np
 import string
 import nltk
+import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
-from nltk import RegexpTokenizer
+from nltk.tokenize import RegexpTokenizer
 
 
-# In[225]:
+# In[25]:
 
 
 np.random.seed(42)
 
 
-# In[226]:
+# In[26]:
 
 
 bp_data = pd.read_csv("articles.csv", header=0)
 
 
-# In[227]:
+# In[27]:
 
 
 bp_data.head(1)
 
 
-# In[228]:
+# In[28]:
 
 
-def preprocess_docs(docs, use_lemmatizer=True):
+def preprocess_docs(use_lemmatizer = True):
     '''Tokenize and preprocess documents
     
     Parameters
@@ -72,25 +74,31 @@ def preprocess_docs(docs, use_lemmatizer=True):
     
     for row in bp_data.itertuples(index=True, name='Doc'):
         text = row.text
+        
+        # remove numbers
+        text = re.sub(r'\d+', '', text)
+        
         text_words = tokenizer.tokenize(text)
         
         if use_lemmatizer:
-            text_words = [lemmatizer.lemmatize(word, pos="v").lower() for word in text_words if word.lower() not in en_stop]
+            text_words = [lemmatizer.lemmatize(word, pos="v").lower() for word in text_words
+                          if word not in string.punctuation and word.lower() not in en_stop]
         else:
-            text_words = [stemmer.stem(word).lower() for word in text_words if word.lower() not in en_stop]
+            text_words = [stemmer.stem(word).lower() for word in text_words
+                         if word not in string.punctuation and word.lower() not in en_stop]
         
         preproccessed_docs.append({'id': row.Index, 'words': text_words})
     
     return preproccessed_docs
 
 
-# In[229]:
+# In[69]:
 
 
-preproccessed_docs = preprocess_docs(bp_data)
+preproccessed_docs = preprocess_docs()
 
 
-# In[230]:
+# In[70]:
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -113,19 +121,19 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[231]:
+# In[71]:
 
 
-df_frequency = get_document_by_term_frequency(preproccessed_docs)
+df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[232]:
+# In[73]:
 
 
 df_frequency
 
 
-# In[233]:
+# In[74]:
 
 
 def get_tf_idf(df_frequency):
@@ -133,8 +141,9 @@ def get_tf_idf(df_frequency):
     # tf := word frequency / total frequency
     df.drop('total_words', inplace=False)[:] /= df.loc['total_words']
     # idf := log ( len(all_documents) / len(documents_containing_word) )
+    
+    corpus_size = df.shape[1]
 
-    corpus_size = df_tf.shape[1]
     # number of non-zero cols + 1 to avoid division by zero
     df['doc_frequency'] = df.fillna(0).astype(bool).sum(axis=1) + 1 
     
@@ -149,9 +158,15 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[235]:
+# In[75]:
 
 
 df_tf_idf = get_tf_idf(df_frequency)
 df_tf_idf
+
+
+# In[ ]:
+
+
+
 
