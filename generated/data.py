@@ -133,13 +133,14 @@ df_frequency = get_term_by_document_frequency(preproccessed_docs)
 df_frequency
 
 
-# In[74]:
+# In[292]:
 
 
 def get_tf_idf(df_frequency):
     df = df_frequency.copy()
     # tf := word frequency / total frequency
-    df.drop('total_words', inplace=False)[:] /= df.loc['total_words']
+    df = df.drop('total_words', inplace=False)[:] / df.loc['total_words']
+    
     # idf := log ( len(all_documents) / len(documents_containing_word) )
     
     corpus_size = df.shape[1]
@@ -153,16 +154,15 @@ def get_tf_idf(df_frequency):
     df[_cols] = df[_cols].multiply(df["idf"], axis="index")
     
     df.drop(columns=['doc_frequency', 'idf'], inplace=True)
-    df.drop('total_words', inplace=True)
     
     return df
 
 
-# In[75]:
+# In[293]:
 
 
 df_tf_idf = get_tf_idf(df_frequency)
-df_tf_idf
+display(df_tf_idf)
 
 
 # In[ ]:
