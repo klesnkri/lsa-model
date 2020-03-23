@@ -15,7 +15,7 @@
 # - [x] remove numbers from terms - done but not sure if it's good thing to do, maybe it's also important for relevancy of docs,
 # like for example when there is year written?
 
-# In[2]:
+# In[1]:
 
 
 import pandas as pd
@@ -30,25 +30,25 @@ from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-# In[3]:
+# In[2]:
 
 
 np.random.seed(42)
 
 
-# In[4]:
+# In[3]:
 
 
 bp_data = pd.read_csv("articles.csv", header=0)
 
 
-# In[5]:
+# In[4]:
 
 
 bp_data.head(1)
 
 
-# In[6]:
+# In[5]:
 
 
 def preprocess_docs(docs, use_lemmatizer = True):
@@ -94,14 +94,14 @@ def preprocess_docs(docs, use_lemmatizer = True):
     return pdocs
 
 
-# In[39]:
+# In[6]:
 
 
 preproccessed_docs = preprocess_docs(bp_data)
 display(preproccessed_docs)
 
 
-# In[8]:
+# In[7]:
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -111,10 +111,11 @@ def get_term_by_document_frequency(preprocessed_docs):
         doc_id = index
         doc_words = row['words']
         
-        document_by_term[doc_id] = {
-            'total_words': len(doc_words)
-        }
-        
+        # computed later, @TODO: move computation here and fix below or remove
+#         document_by_term[doc_id] = {
+#             'total_words': len(doc_words)
+#         }
+        document_by_term[doc_id] = {}
         
         for word in set(row['words']):
             document_by_term[doc_id][word] = doc_words.count(word)
@@ -124,19 +125,19 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[54]:
+# In[8]:
 
 
 df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[55]:
+# In[ ]:
 
 
 df_frequency
 
 
-# In[105]:
+# In[ ]:
 
 
 def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
@@ -171,31 +172,40 @@ def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
     return df
 
 
-# In[106]:
+# In[ ]:
 
 
 reduce_terms(df_frequency).sort_values('doc_frequency', ascending=False).shape
 
 
-# In[108]:
+# In[ ]:
 
 
 reduce_terms(df_frequency, 0.8, 0.1).sort_values('doc_frequency', ascending=False)
 
 
-# In[77]:
+# In[ ]:
 
 
 df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
 
 
-# In[75]:
+# In[ ]:
+
+
+df_reduced.loc['total_words'] = df_reduced.sum()
+df_reduced
+
+
+# In[ ]:
 
 
 def get_tf_idf(df_frequency):
     df = df_frequency.copy()
     # tf := word frequency / total frequency
-    df = df.drop('total_words', inplace=False)[:] / df.loc['total_words']
+    df.loc['total_words'] = df.sum()
+    
+    df = df.drop('total_words')[:] / df.loc['total_words']
     
     # idf := log ( len(all_documents) / len(documents_containing_word) )
     
@@ -215,14 +225,14 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[78]:
+# In[ ]:
 
 
 df_tf_idf = get_tf_idf(df_reduced)
 display(df_tf_idf)
 
 
-# In[13]:
+# In[ ]:
 
 
 values = df_tf_idf.fillna(0).to_numpy()
