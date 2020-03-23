@@ -148,8 +148,8 @@ def get_tf_idf(df_frequency):
     
     corpus_size = df.shape[1]
 
-    # number of non-zero cols + 1 to avoid division by zero
-    df['doc_frequency'] = df.fillna(0).astype(bool).sum(axis=1) + 1
+    # number of non-zero cols
+    df['doc_frequency'] = df.fillna(0).astype(bool).sum(axis=1)
         
     df['idf'] = np.log( corpus_size / df['doc_frequency'] )
     
