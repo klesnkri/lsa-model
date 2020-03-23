@@ -15,7 +15,7 @@
 # - [x] remove numbers from terms - done but not sure if it's good thing to do, maybe it's also important for relevancy of docs,
 # like for example when there is year written?
 
-# In[17]:
+# In[2]:
 
 
 import pandas as pd
@@ -30,25 +30,25 @@ from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-# In[18]:
+# In[3]:
 
 
 np.random.seed(42)
 
 
-# In[19]:
+# In[4]:
 
 
 bp_data = pd.read_csv("articles.csv", header=0)
 
 
-# In[20]:
+# In[5]:
 
 
 bp_data.head(1)
 
 
-# In[118]:
+# In[6]:
 
 
 def preprocess_docs(docs, use_lemmatizer = True):
@@ -94,14 +94,14 @@ def preprocess_docs(docs, use_lemmatizer = True):
     return pdocs
 
 
-# In[119]:
+# In[7]:
 
 
 preproccessed_docs = preprocess_docs(bp_data)
 display(preproccessed_docs)
 
 
-# In[128]:
+# In[8]:
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -124,19 +124,19 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[129]:
+# In[9]:
 
 
 df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[130]:
+# In[10]:
 
 
 df_frequency
 
 
-# In[131]:
+# In[11]:
 
 
 def get_tf_idf(df_frequency):
@@ -162,17 +162,18 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[132]:
+# In[12]:
 
 
 df_tf_idf = get_tf_idf(df_frequency)
 display(df_tf_idf)
 
 
-# In[ ]:
+# In[13]:
 
 
-
+values = df_tf_idf.fillna(0).to_numpy()
+values
 
 
 # In[ ]:
