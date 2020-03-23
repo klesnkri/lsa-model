@@ -94,7 +94,7 @@ def preprocess_docs(docs, use_lemmatizer = True):
     return pdocs
 
 
-# In[7]:
+# In[39]:
 
 
 preproccessed_docs = preprocess_docs(bp_data)
@@ -124,33 +124,72 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[9]:
+# In[54]:
 
 
 df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[10]:
+# In[55]:
 
 
 df_frequency
 
 
-# In[32]:
+# In[105]:
 
 
-df_frequency['all'] = df_frequency.drop(columns='all').fillna(0).sum(axis=1)
-df_frequency.sort_values(by='all', ascending=False)
+def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
+    '''Remove unimportant terms from term-by-document matrix.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+    max_df : float , between [0, 1]
+             Terms that appear in more % of documents will be ignored
+    min_df : float , between [0, 1]
+             Terms that appear in less % of documents will be ignored
+    max_terms : int , None
+                If not None, only top `max_terms` terms will be returned.
+    '''
+    df = df_frequency.copy()
+    if 'doc_frequency' in df:
+        df = df.drop(columns='doc_frequency')
+    
+    corpus_size = df.shape[1]
+    
+    df['doc_frequency'] = df_frequency.fillna(0).astype(bool).sum(axis=1) / corpus_size
+    
+    total_words = df.loc['total_words']
+    
+    df = df[df.doc_frequency <= max_df]
+    df = df[df.doc_frequency >= min_df]
+    
+    if max_terms is not None:
+        assert('not implementd' == False) # @TODO - implement or remove
+    
+    return df
 
 
-# In[35]:
+# In[106]:
 
 
-df_frequency['doc_frequency'] = df_frequency.drop(columns='doc_frequency').fillna(0).astype(bool).sum(axis=1)
-df_frequency.sort_values(by='doc_frequency', ascending=False)
+reduce_terms(df_frequency).sort_values('doc_frequency', ascending=False).shape
 
 
-# In[11]:
+# In[108]:
+
+
+reduce_terms(df_frequency, 0.8, 0.1).sort_values('doc_frequency', ascending=False)
+
+
+# In[77]:
+
+
+df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
+
+
+# In[75]:
 
 
 def get_tf_idf(df_frequency):
@@ -176,10 +215,10 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[12]:
+# In[78]:
 
 
-df_tf_idf = get_tf_idf(df_frequency)
+df_tf_idf = get_tf_idf(df_reduced)
 display(df_tf_idf)
 
 
