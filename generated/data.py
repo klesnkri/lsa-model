@@ -15,7 +15,7 @@
 # - [x] remove numbers from terms - done but not sure if it's good thing to do, maybe it's also important for relevancy of docs,
 # like for example when there is year written?
 
-# In[95]:
+# In[17]:
 
 
 import pandas as pd
@@ -27,27 +27,28 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import RegexpTokenizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-# In[96]:
+# In[18]:
 
 
 np.random.seed(42)
 
 
-# In[97]:
+# In[19]:
 
 
 bp_data = pd.read_csv("articles.csv", header=0)
 
 
-# In[98]:
+# In[20]:
 
 
 bp_data.head(1)
 
 
-# In[99]:
+# In[118]:
 
 
 def preprocess_docs(docs, use_lemmatizer = True):
@@ -87,33 +88,35 @@ def preprocess_docs(docs, use_lemmatizer = True):
             text_words = [stemmer.stem(word).lower() for word in text_words
                          if word not in string.punctuation and word.lower() not in en_stop]
         
-        preproccessed_docs.append({'id': row.Index, 'words': text_words})
+        preproccessed_docs.append({'words': text_words})
     
-    return preproccessed_docs
+    pdocs = pd.DataFrame(preproccessed_docs)
+    return pdocs
 
 
-# In[107]:
+# In[119]:
 
 
 preproccessed_docs = preprocess_docs(bp_data)
+display(preproccessed_docs)
 
 
-# In[101]:
+# In[128]:
 
 
 def get_term_by_document_frequency(preprocessed_docs):
     document_by_term = {}
     
-    for doc_data in preprocessed_docs:
-        doc_id = doc_data['id']
-        doc_words = doc_data['words']
+    for index, row in preprocessed_docs.iterrows():
+        doc_id = index
+        doc_words = row['words']
         
         document_by_term[doc_id] = {
             'total_words': len(doc_words)
         }
         
         
-        for word in set(doc_data['words']):
+        for word in set(row['words']):
             document_by_term[doc_id][word] = doc_words.count(word)
 
     df = pd.DataFrame(document_by_term)
@@ -121,19 +124,19 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[102]:
+# In[129]:
 
 
 df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[103]:
+# In[130]:
 
 
 df_frequency
 
 
-# In[104]:
+# In[131]:
 
 
 def get_tf_idf(df_frequency):
@@ -159,11 +162,23 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[105]:
+# In[132]:
 
 
 df_tf_idf = get_tf_idf(df_frequency)
 display(df_tf_idf)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
