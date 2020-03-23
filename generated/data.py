@@ -101,7 +101,7 @@ preproccessed_docs = preprocess_docs(bp_data)
 display(preproccessed_docs)
 
 
-# In[7]:
+# In[9]:
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -125,19 +125,19 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[8]:
+# In[10]:
 
 
 df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[ ]:
+# In[11]:
 
 
 df_frequency
 
 
-# In[ ]:
+# In[14]:
 
 
 def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
@@ -161,8 +161,6 @@ def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
     
     df['doc_frequency'] = df_frequency.fillna(0).astype(bool).sum(axis=1) / corpus_size
     
-    total_words = df.loc['total_words']
-    
     df = df[df.doc_frequency <= max_df]
     df = df[df.doc_frequency >= min_df]
     
@@ -172,32 +170,25 @@ def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
     return df
 
 
-# In[ ]:
+# In[15]:
 
 
 reduce_terms(df_frequency).sort_values('doc_frequency', ascending=False).shape
 
 
-# In[ ]:
+# In[16]:
 
 
 reduce_terms(df_frequency, 0.8, 0.1).sort_values('doc_frequency', ascending=False)
 
 
-# In[ ]:
+# In[17]:
 
 
 df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
 
 
-# In[ ]:
-
-
-df_reduced.loc['total_words'] = df_reduced.sum()
-df_reduced
-
-
-# In[ ]:
+# In[19]:
 
 
 def get_tf_idf(df_frequency):
@@ -225,28 +216,28 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[ ]:
+# In[20]:
 
 
 df_tf_idf = get_tf_idf(df_reduced)
 display(df_tf_idf)
 
 
-# In[ ]:
+# In[21]:
 
 
 values = df_tf_idf.fillna(0).to_numpy()
 values
 
 
-# In[ ]:
+# In[23]:
 
 
+u, s, vh = np.linalg.svd(values, full_matrices=True)
 
 
-
-# In[ ]:
-
+# In[26]:
 
 
+vh
 
