@@ -15,7 +15,7 @@
 # - [x] remove numbers from terms - done but not sure if it's good thing to do, maybe it's also important for relevancy of docs,
 # like for example when there is year written?
 
-# In[24]:
+# In[95]:
 
 
 import pandas as pd
@@ -29,28 +29,28 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import RegexpTokenizer
 
 
-# In[25]:
+# In[96]:
 
 
 np.random.seed(42)
 
 
-# In[26]:
+# In[97]:
 
 
 bp_data = pd.read_csv("articles.csv", header=0)
 
 
-# In[27]:
+# In[98]:
 
 
 bp_data.head(1)
 
 
-# In[28]:
+# In[99]:
 
 
-def preprocess_docs(use_lemmatizer = True):
+def preprocess_docs(docs, use_lemmatizer = True):
     '''Tokenize and preprocess documents
     
     Parameters
@@ -72,7 +72,7 @@ def preprocess_docs(use_lemmatizer = True):
     else:
         stemmer = SnowballStemmer("english")
     
-    for row in bp_data.itertuples(index=True, name='Doc'):
+    for row in docs.itertuples(index=True, name='Doc'):
         text = row.text
         
         # remove numbers
@@ -92,13 +92,13 @@ def preprocess_docs(use_lemmatizer = True):
     return preproccessed_docs
 
 
-# In[69]:
+# In[107]:
 
 
-preproccessed_docs = preprocess_docs()
+preproccessed_docs = preprocess_docs(bp_data)
 
 
-# In[70]:
+# In[101]:
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -121,19 +121,19 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[71]:
+# In[102]:
 
 
 df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[73]:
+# In[103]:
 
 
 df_frequency
 
 
-# In[292]:
+# In[104]:
 
 
 def get_tf_idf(df_frequency):
@@ -146,9 +146,10 @@ def get_tf_idf(df_frequency):
     corpus_size = df.shape[1]
 
     # number of non-zero cols + 1 to avoid division by zero
-    df['doc_frequency'] = df.fillna(0).astype(bool).sum(axis=1) + 1 
-    
+    df['doc_frequency'] = df.fillna(0).astype(bool).sum(axis=1) + 1
+        
     df['idf'] = np.log( corpus_size / df['doc_frequency'] )
+    
     # tf-idf := tf * idf
     _cols = df.columns.difference(['idf', 'doc_frequency'])
     df[_cols] = df[_cols].multiply(df["idf"], axis="index")
@@ -158,7 +159,7 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[293]:
+# In[105]:
 
 
 df_tf_idf = get_tf_idf(df_frequency)
