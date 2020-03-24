@@ -201,13 +201,37 @@ def get_concept_by_document(df_tf_idf):
     S = np.diag(s_eigen)
     
     concept_by_document = S @ V.T
-    return concept_by_document
+    return pd.DataFrame(concept_by_document)
 
 
-values_concept = get_concept_by_document(df_tf_idf)
+df_concept = get_concept_by_document(df_tf_idf)
+df_concept
 
 
-def cosine_similiarity(x, y):
-    '''Returns cosine_similiarity of two vectors.'''
+def cosine_similarity(x, y):
+    '''Returns cosine similarity of two vectors.'''
     return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
+
+
+def get_n_nearest(df_concept, i, n=None, min_sim=0):
+    '''Returns most similar (column) vectors to `i`-th vector in `arr`.
+    
+    Parameters
+    ----------
+    df_concept : pd.DataFrame
+    i : index of vector to be compared to
+    n : return at most `n` vectors
+    '''
+    
+    src_vector = df_concept[i].copy()
+    df = df_concept.apply(func=cosine_similarity, axis=0, args=(src_vector, ))
+    return df
+    # skip first value - the src_vector itself
+    if n:
+        return df.sort_values(ascending=False)[1:n + 1]
+    else:
+        return df.sort_values(ascending=False)
+
+
+get_n_nearest(df_concept, 1, 3)
 
