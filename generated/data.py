@@ -8,8 +8,10 @@
 #  - [ ] check that it's actually correct - especially if we don't map terms to wrong documents
 # - [x] convert term-by-document frequencies to tf-idf (calcualte tf-idf for each term-document pair)
 #  - [ ] check
-# - [ ] we may need actual (numpy?) matrix?
-# - [ ] LSI magic
+# - [x] we may need actual (numpy?) matrix?
+# - [x] LSI magic
+# - [ ] Put it together
+# - [ ] GUI
 # 
 # ### Minor
 # - [x] remove numbers from terms - done but not sure if it's good thing to do, maybe it's also important for relevancy of docs,
