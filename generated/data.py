@@ -15,7 +15,7 @@
 # - [x] remove numbers from terms - done but not sure if it's good thing to do, maybe it's also important for relevancy of docs,
 # like for example when there is year written?
 
-# In[1]:
+# In[2]:
 
 
 import pandas as pd
@@ -30,25 +30,25 @@ from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-# In[2]:
+# In[3]:
 
 
 np.random.seed(42)
 
 
-# In[3]:
+# In[4]:
 
 
 bp_data = pd.read_csv("articles.csv", header=0)
 
 
-# In[4]:
+# In[5]:
 
 
 bp_data.head(1)
 
 
-# In[5]:
+# In[6]:
 
 
 def preprocess_docs(docs, use_lemmatizer = True):
@@ -94,14 +94,14 @@ def preprocess_docs(docs, use_lemmatizer = True):
     return pdocs
 
 
-# In[6]:
+# In[7]:
 
 
 preproccessed_docs = preprocess_docs(bp_data)
 display(preproccessed_docs)
 
 
-# In[9]:
+# In[8]:
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -125,19 +125,19 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[10]:
+# In[9]:
 
 
 df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[11]:
+# In[10]:
 
 
 df_frequency
 
 
-# In[14]:
+# In[64]:
 
 
 def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
@@ -154,48 +154,49 @@ def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
                 If not None, only top `max_terms` terms will be returned.
     '''
     df = df_frequency.copy()
-    if 'doc_frequency' in df:
-        df = df.drop(columns='doc_frequency')
-    
     corpus_size = df.shape[1]
-    
-    df['doc_frequency'] = df_frequency.fillna(0).astype(bool).sum(axis=1) / corpus_size
-    
+
+    if 'doc_frequency' not in df:
+        df['doc_frequency'] = df_frequency.fillna(0).astype(bool).sum(axis=1) / corpus_size
+            
     df = df[df.doc_frequency <= max_df]
     df = df[df.doc_frequency >= min_df]
     
-    if max_terms is not None:
-        assert('not implementd' == False) # @TODO - implement or remove
+    if max_terms is not None and max_terms < df.shape[0]:
+        df['term_count'] = df_frequency.fillna(0).sum(axis=1)
+        df = df.sort_values('term_count', ascending=False)
+        df = df.head(max_terms)
+        df.drop('term_count',axis=1, inplace=True)
     
     return df
 
 
-# In[15]:
+# In[65]:
 
 
 reduce_terms(df_frequency).sort_values('doc_frequency', ascending=False).shape
 
 
-# In[16]:
+# In[66]:
 
 
-reduce_terms(df_frequency, 0.8, 0.1).sort_values('doc_frequency', ascending=False)
+reduce_terms(df_frequency, 0.8, 0.1, 1000).sort_values('doc_frequency', ascending=False)
 
 
-# In[17]:
+# In[67]:
 
 
 df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
 
 
-# In[19]:
+# In[68]:
 
 
 def get_tf_idf(df_frequency):
     df = df_frequency.copy()
     # tf := word frequency / total frequency
     df.loc['total_words'] = df.sum()
-    
+        
     df = df.drop('total_words')[:] / df.loc['total_words']
     
     # idf := log ( len(all_documents) / len(documents_containing_word) )
@@ -203,7 +204,8 @@ def get_tf_idf(df_frequency):
     corpus_size = df.shape[1]
 
     # number of non-zero cols
-    df['doc_frequency'] = df.fillna(0).astype(bool).sum(axis=1)
+    if 'doc_frequency' not in df_frequency:
+        df['doc_frequency'] = df.fillna(0).astype(bool).sum(axis=1)
         
     df['idf'] = np.log( corpus_size / df['doc_frequency'] )
     
@@ -216,28 +218,34 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[20]:
+# In[69]:
 
 
 df_tf_idf = get_tf_idf(df_reduced)
 display(df_tf_idf)
 
 
-# In[21]:
+# In[70]:
 
 
 values = df_tf_idf.fillna(0).to_numpy()
 values
 
 
-# In[23]:
+# In[71]:
 
 
 u, s, vh = np.linalg.svd(values, full_matrices=True)
 
 
-# In[26]:
+# In[19]:
 
 
 vh
+
+
+# In[ ]:
+
+
+
 
