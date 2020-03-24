@@ -204,3 +204,23 @@ def get_concept_by_document(df_tf_idf):
 
 values_concept = get_concept_by_document(df_tf_idf)
 
+
+def cosine_similiarity(x, y):
+    '''Returns cosine_similiarity of two vectors.'''
+    return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
+
+
+pd.DataFrame(values_concept).sample(random_state=42)
+
+
+def custom_svd(A):
+    eigen_vals, eigen_vecs = np.linalg.eig(A.dot(np.transpose(A)))
+    matrix_U = eigen_vecs
+    
+    eigen_vals, eigen_vecs = np.linalg.eig(np.transpose(A).dot(A))
+    matrix_V = np.transpose(eigen_vecs)
+    
+
+
+custom_svd(values)
+
