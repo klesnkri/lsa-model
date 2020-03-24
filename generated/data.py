@@ -17,6 +17,7 @@
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import string
 import nltk
 import re
@@ -26,6 +27,8 @@ from nltk.stem import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+import umap
 
 
 np.random.seed(42)
@@ -195,4 +198,16 @@ u, s, vh = np.linalg.svd(values, full_matrices=True)
 
 
 vh
+
+
+def custom_svd(A):
+    eigen_vals, eigen_vecs = np.linalg.eig(A.dot(np.transpose(A)))
+    matrix_U = eigen_vecs
+    
+    eigen_vals, eigen_vecs = np.linalg.eig(np.transpose(A).dot(A))
+    matrix_V = np.transpose(eigen_vecs)
+    
+
+
+custom_svd(values)
 
