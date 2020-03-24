@@ -15,9 +15,6 @@
 # - [x] remove numbers from terms - done but not sure if it's good thing to do, maybe it's also important for relevancy of docs,
 # like for example when there is year written?
 
-# In[2]:
-
-
 import pandas as pd
 import numpy as np
 import string
@@ -30,25 +27,13 @@ from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-# In[3]:
-
-
 np.random.seed(42)
-
-
-# In[4]:
 
 
 bp_data = pd.read_csv("articles.csv", header=0)
 
 
-# In[5]:
-
-
 bp_data.head(1)
-
-
-# In[6]:
 
 
 def preprocess_docs(docs, use_lemmatizer = True):
@@ -94,14 +79,8 @@ def preprocess_docs(docs, use_lemmatizer = True):
     return pdocs
 
 
-# In[7]:
-
-
 preproccessed_docs = preprocess_docs(bp_data)
 display(preproccessed_docs)
-
-
-# In[8]:
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -125,19 +104,10 @@ def get_term_by_document_frequency(preprocessed_docs):
     return df
 
 
-# In[9]:
-
-
 df_frequency = get_term_by_document_frequency(preproccessed_docs)
 
 
-# In[10]:
-
-
 df_frequency
-
-
-# In[64]:
 
 
 def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
@@ -171,25 +141,13 @@ def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
     return df
 
 
-# In[65]:
-
-
 reduce_terms(df_frequency).sort_values('doc_frequency', ascending=False).shape
-
-
-# In[66]:
 
 
 reduce_terms(df_frequency, 0.8, 0.1, 1000).sort_values('doc_frequency', ascending=False)
 
 
-# In[67]:
-
-
 df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
-
-
-# In[68]:
 
 
 def get_tf_idf(df_frequency):
@@ -218,34 +176,16 @@ def get_tf_idf(df_frequency):
     return df
 
 
-# In[69]:
-
-
 df_tf_idf = get_tf_idf(df_reduced)
 display(df_tf_idf)
-
-
-# In[70]:
 
 
 values = df_tf_idf.fillna(0).to_numpy()
 values
 
 
-# In[71]:
-
-
 u, s, vh = np.linalg.svd(values, full_matrices=True)
 
 
-# In[19]:
-
-
 vh
-
-
-# In[ ]:
-
-
-
 
