@@ -21,7 +21,8 @@ import string
 import nltk
 import re
 from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
+from nltk.stem import WordNetLemmatizer 
 from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -34,6 +35,12 @@ bp_data = pd.read_csv("articles.csv", header=0)
 
 
 bp_data.head(1)
+
+
+def get_lemmatization_pos(word):
+    tag = nltk.pos_tag([word])[0][1][0].upper()
+    tag_dictionary = {"J": wordnet.ADJ, "N": wordnet.NOUN, "V": wordnet.VERB, "R": wordnet.ADV}
+    return tag_dictionary.get(tag, wordnet.NOUN)
 
 
 def preprocess_docs(docs, use_lemmatizer = True):
@@ -67,10 +74,10 @@ def preprocess_docs(docs, use_lemmatizer = True):
         text_words = tokenizer.tokenize(text)
         
         if use_lemmatizer:
-            text_words = [lemmatizer.lemmatize(word, pos="v").lower() for word in text_words
+            text_words = [lemmatizer.lemmatize(word.lower(), get_lemmatization_pos(word.lower())) for word in text_words
                           if word not in string.punctuation and word.lower() not in en_stop]
         else:
-            text_words = [stemmer.stem(word).lower() for word in text_words
+            text_words = [stemmer.stem(word.lower()) for word in text_words
                          if word not in string.punctuation and word.lower() not in en_stop]
         
         preproccessed_docs.append({'words': text_words})
@@ -80,7 +87,7 @@ def preprocess_docs(docs, use_lemmatizer = True):
 
 
 preproccessed_docs = preprocess_docs(bp_data)
-display(preproccessed_docs)
+preproccessed_docs
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -144,7 +151,7 @@ def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
 reduce_terms(df_frequency).sort_values('doc_frequency', ascending=False).shape
 
 
-reduce_terms(df_frequency, 0.8, 0.1, 1000).sort_values('doc_frequency', ascending=False)
+reduce_terms(df_frequency, 0.8, 0.1,1000).sort_values('doc_frequency', ascending=False)
 
 
 df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
