@@ -30,7 +30,8 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
-import umap
+import math
+from pandas._testing import assert_frame_equal
 
 
 np.random.seed(42)
@@ -192,16 +193,43 @@ df_tf_idf = get_tf_idf(df_reduced)
 display(df_tf_idf)
 
 
-def get_concept_by_document(df_tf_idf):
+def custom_svd(A, full_matrices=True):
+    eig_vals, eig_vecs = np.linalg.eig(A @ A.transpose())
+    U = eig_vecs.real
+    
+    eig_vals, eig_vecs = np.linalg.eig(A.transpose() @ A)
+    V = eig_vecs.transpose().real
+    
+    s_eigen = [math.sqrt(abs(x.real)) for x in eig_vals]
+    
+    if full_matrices == False:
+        k = min(A.shape[0], A.shape[1])
+        U = U[:, :k]
+        V = V[:k, :]
+    
+    return U, np.array(s_eigen), V
+
+
+def get_concept_by_document(df_tf_idf, customSVD = False):
     '''Transform data to concept space.
     '''
     values = df_tf_idf.fillna(0).to_numpy()
-    U, s_eigen, V = np.linalg.svd(values, full_matrices=False)
+    
+    if customSVD:
+        U, s_eigen, V = custom_svd(values, False)
+    else:
+        U, s_eigen, V = np.linalg.svd(values, full_matrices=False)
     
     S = np.diag(s_eigen)
     
     concept_by_document = S @ V.T
     return pd.DataFrame(concept_by_document)
+
+
+get_concept_by_document(df_tf_idf, True)
+
+
+get_concept_by_document(df_tf_idf)
 
 
 df_concept = get_concept_by_document(df_tf_idf)
