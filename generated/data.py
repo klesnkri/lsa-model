@@ -204,3 +204,8 @@ def get_concept_by_document(df_tf_idf):
 
 values_concept = get_concept_by_document(df_tf_idf)
 
+
+def cosine_similiarity(x, y):
+    '''Returns cosine_similiarity of two vectors.'''
+    return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
+
