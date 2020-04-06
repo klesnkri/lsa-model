@@ -253,13 +253,20 @@ def get_n_nearest(df_concept, i, n=None, min_sim=0):
     
     src_vector = df_concept[i].copy()
     df = df_concept.apply(func=cosine_similarity, axis=0, args=(src_vector, ))
-    return df
-    # skip first value - the src_vector itself
+    
     if n:
+        # skip first value - the src_vector itself
         return df.sort_values(ascending=False)[1:n + 1]
     else:
         return df.sort_values(ascending=False)
 
 
-get_n_nearest(df_concept, 1, 3)
+best_match = get_n_nearest(df_concept, 2, 3)
+best_match
+
+
+doc = 2
+display(bp_data.iloc[doc])
+for i, similarity in get_n_nearest(df_concept, doc, 3).iteritems():
+    display(bp_data.iloc[i])
 
