@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}LSA - {{ article.title }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('lsa.index') }}">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Article</li>
+  </ol>
+</nav>
+
+<h1>{{ article.title }}</h1>
+<h4>Author: {{ article.author }}, <a href="{{ article.link }}">source</a></h4>
+
+<div class="jumbotron">
+  <h3>Similar articles</h3>
+  <ul>
+  {% for s in similar.itertuples(index=True) %}
+    <li><a href="{{ url_for('lsa.article', article_id=s.Index) }}">{{ s.title }}</a> ({{ '{:.1f}%'.format(s.similarity * 100) }})</li>
+  {% endfor %}
+  </ul>
+</div>
+<div>
+  {{ article.text | nl2p }}
+</div>
+{% endblock %}

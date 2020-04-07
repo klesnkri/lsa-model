@@ -235,7 +235,7 @@ class LSA:
                 print('Concept matrix saved to {}'.format(cache_file))
         
     def get_n_nearest(self, doc_index, n):
-        best_match = get_n_nearest(self.df_concept, 2, 3)
+        best_match = get_n_nearest(self.df_concept, doc_index, n)
 
         df = self.df_data.iloc[best_match.index].copy()
         df['similarity'] = best_match

@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+from ..lsa import LSA
 
 __version__ = (0, 1, 0, "dev")
 

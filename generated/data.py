@@ -150,5 +150,8 @@ best_match = get_n_nearest(df_concept, 2, 3)
 best_match
 
 
-bp_data.iloc[best_match.index]
+lsa = LSA()
+
+
+lsa.load()
 
