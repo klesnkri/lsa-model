@@ -265,8 +265,5 @@ best_match = get_n_nearest(df_concept, 2, 3)
 best_match
 
 
-doc = 2
-display(bp_data.iloc[doc])
-for i, similarity in get_n_nearest(df_concept, doc, 3).iteritems():
-    display(bp_data.iloc[i])
+bp_data.iloc[best_match.index]
 
