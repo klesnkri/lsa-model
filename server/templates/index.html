@@ -8,12 +8,12 @@
 </nav>
 
 <h1>LSA Demo</h1>
-<p>
+<p class="jumbotron">
   By David Mašek and Kristýna Klesnilová. Click on any link below to start.
 </p>
 
 
-<h2 class="mt-4">Articles</h2>
+<h2>Articles</h2>
 <ul>
 {% for row in articles.itertuples(index=True) %}
   <li><a href="{{ url_for('lsa.article', article_id=row.Index) }}">{{ row.title }}</a></li>
