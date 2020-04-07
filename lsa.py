@@ -4,6 +4,7 @@ import string
 import nltk
 import re
 import math
+import os
 from tqdm import tqdm
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
@@ -46,6 +47,7 @@ def preprocess_docs(docs, use_lemmatizer=True, remove_numbers=True):
     else:
         stemmer = SnowballStemmer("english")
     
+    # tqdm displays progress bar
     for row in tqdm(docs.itertuples(index=True, name='Doc'), total=len(docs)):
         text = row.text
         
@@ -62,6 +64,9 @@ def preprocess_docs(docs, use_lemmatizer=True, remove_numbers=True):
                          if word not in string.punctuation and word.lower() not in en_stop]
         
         preproccessed_docs.append({'words': text_words})
+    
+    print() # fix missing newline from tqdm
+    
     
     pdocs = pd.DataFrame(preproccessed_docs)
     return pdocs
@@ -199,26 +204,48 @@ def get_n_nearest(df_concept, i, n=None, min_sim=0):
     else:
         return df.sort_values(ascending=False)
 
+class LSA:
+    '''Wrapper for LSA methods and data.'''
+    def __init__(self):
+        pass
+
+    def load(self, data_file='articles.csv', use_cache=True, cache_file='concept.csv'):
+        print('Loading data...', flush=True)
+        self.df_data = load_data('articles.csv')
+        
+        if use_cache and os.path.isfile(cache_file):
+            print('Loading concept matrix from "{}"...'.format(cache_file))
+            self.df_concept = pd.read_csv(cache_file, index_col=0)
+            self.df_concept.columns = self.df_concept.columns.astype(int)
+        else:
+            print('Preprocessing...', flush=True)
+            preproccessed_docs = preprocess_docs(self.df_data)
+            
+            df_frequency = get_term_by_document_frequency(preproccessed_docs)
+
+            df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
+
+            df_tf_idf = get_tf_idf(df_reduced)
+
+            print('Creating concept matrix...', flush=True)
+            self.df_concept = get_concept_by_document(df_tf_idf)
+
+            if cache_file:
+                self.df_concept.to_csv(cache_file, header=True, index=True)
+                print('Concept matrix saved to {}'.format(cache_file))
+        
+    def get_n_nearest(self, doc_index, n):
+        best_match = get_n_nearest(self.df_concept, 2, 3)
+
+        df = self.df_data.iloc[best_match.index].copy()
+        df['similarity'] = best_match
+        return df
+
 
 if __name__ == "__main__":
-    np.random.seed(42)
+    lsa = LSA()
+    lsa.load()
 
-    print('Loading data...', flush=True)
-    df_data = load_data('articles.csv')
+    df = lsa.get_n_nearest(doc_index=2, n=5)
 
-    print('Preprocessing...', flush=True)
-    preproccessed_docs = preprocess_docs(df_data)
-    
-    df_frequency = get_term_by_document_frequency(preproccessed_docs)
-
-    df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
-
-    df_tf_idf = get_tf_idf(df_reduced)
-
-    print() # fix missing newline
-    print('Computing...', flush=True)
-    df_concept = get_concept_by_document(df_tf_idf)
-
-    best_match = get_n_nearest(df_concept, 2, 3)
-
-    print(df_data.iloc[best_match.index])
+    print(df)
