@@ -2,3 +2,4 @@
 .vscode
 __pycache__/
 concept.csv
+tf_idf.csv

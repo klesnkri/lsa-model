@@ -233,36 +233,39 @@ def get_n_nearest(df_concept, i, n=None, min_sim=0):
 
 class LSA:
     '''Wrapper for LSA methods and data.'''
-    def __init__(self):
-        pass
-
-    def load(self, data_files=['articles.csv', 'recipes.csv'], use_cache=True, cache_file='concept.csv'):
-        print('Loading data...', flush=True)
+    def __init__(self, data_files=['articles.csv', 'recipes.csv']):
         self.df_data = load_data(data_files)
-        
-        if use_cache and os.path.isfile(cache_file):
-            print('Loading concept matrix from "{}"...'.format(cache_file))
-            self.df_concept = pd.read_csv(cache_file, index_col=0)
+
+    def preprocess(self, file='tf_idf.csv', read_cache=True, max_df=0.75, min_df=0.05, max_terms=1200):
+        if read_cache:
+            if not os.path.isfile(file):
+                raise ValueError("Can't read file {}".format(file))
+            self.df_tf_idf = pd.read_csv(file)
+        else:
+            df_words = preprocess_docs(self.df_data)
+            df_frequency = get_term_by_document_frequency(df_words)
+            df_reduced = reduce_terms(df_frequency, max_df=max_df, min_df=min_df, max_terms=max_terms)
+            self.df_tf_idf = get_tf_idf(df_reduced)
+            if file:
+                self.df_tf_idf.to_csv(file)
+
+    def compute(self, file='concept.csv', read_cache=True):
+        if read_cache:
+            if not os.path.isfile(file):
+                raise ValueError("Can't read file {}".format(file))
+            self.df_concept = pd.read_csv(file, index_col=0)
             # self.df_concept = pd.read_csv(cache_file, index_col=0, usecols=int) .. better?
             self.df_concept.columns = self.df_concept.columns.astype(int)
             if len(self.df_data) != self.df_concept.shape[0]:
                 raise ValueError('Unexpected concept matrix size! Possibly caused by outdated cache.')
         else:
-            print('Preprocessing...', flush=True)
-            preproccessed_docs = preprocess_docs(self.df_data)
-            
-            df_frequency = get_term_by_document_frequency(preproccessed_docs)
+            self.df_concept = get_concept_by_document(self.df_tf_idf)
+            if file:
+                self.df_concept.to_csv(file, header=True, index=True)
 
-            df_reduced = reduce_terms(df_frequency, 0.8, 0.1)
-
-            df_tf_idf = get_tf_idf(df_reduced)
-
-            print('Creating concept matrix...', flush=True)
-            self.df_concept = get_concept_by_document(df_tf_idf)
-
-            if cache_file:
-                self.df_concept.to_csv(cache_file, header=True, index=True)
-                print('Concept matrix saved to {}'.format(cache_file))
+    def load(self, read_cache=True):
+        self.preprocess(read_cache=read_cache)
+        self.compute(read_cache=read_cache)       
         
     def get_n_nearest(self, doc_index, n):
         best_match = get_n_nearest(self.df_concept, doc_index, n)
@@ -277,11 +280,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='LSA demo.')
     parser.add_argument('--no-cache', dest='cache', action='store_false', help='disable cache')
     parser.add_argument('--cache', dest='cache', action='store_true', help='enable cache')
-    
+
     args = parser.parse_args()
     
     lsa = LSA()
-    lsa.load(use_cache=args.cache)
+    lsa.load(read_cache=args.cache)
 
     print('Loaded {} documents'.format(len(lsa.df_data)))
     print('Concept matrix shape: {}'.format(lsa.df_concept.shape))
