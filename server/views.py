@@ -23,7 +23,9 @@ def maxlen(text, maxlen):
 
 @bp.route('/')
 def index():
-    df = load_data('articles.csv')
+    lsa = LSA()
+    lsa.load()
+    df = lsa.df_data
     cols = ['author', 'title']
 
     return render_template('index.html', articles=df[cols])

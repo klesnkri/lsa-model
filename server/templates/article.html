@@ -13,11 +13,11 @@
 
 <div class="jumbotron">
   <h3>Similar articles</h3>
-  <ul>
+  <ol>
   {% for s in similar.itertuples(index=True) %}
     <li><a href="{{ url_for('lsa.article', article_id=s.Index) }}">{{ s.title }}</a> ({{ '{:.1f}%'.format(s.similarity * 100) }})</li>
   {% endfor %}
-  </ul>
+  </ol>
 </div>
 <div>
   {{ article.text | nl2p }}

@@ -5,6 +5,7 @@ import nltk
 import re
 import math
 import os
+import json
 from tqdm import tqdm
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
@@ -12,8 +13,34 @@ from nltk.stem import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import RegexpTokenizer
 
-def load_data(file_path):
-    return pd.read_csv(file_path, header=0)
+def parse_recipes(limit=100, output='recipes.csv'):
+    articles = []
+    with open('recipes.json') as file:
+        for i, line in enumerate(file):
+            if i == limit:
+                break
+                
+            obj = json.loads(line)
+
+            text = '{}\n'.format(obj['Description'])
+            for ing in obj['Ingredients']:
+                text += ing + '\n'
+            for met in obj['Method']:
+                text += met + '\n'
+            articles.append({
+                'title': obj['Name'],
+                'author': obj['Author'],
+                'link': obj['url'],
+                'text': text,
+            })
+
+    df = pd.DataFrame(articles)
+    if output:
+        df.to_csv(output)
+    return df
+
+def load_data(files):
+    return pd.concat((pd.read_csv(f, header=0) for f in files), ignore_index=True)
 
 def get_lemmatization_pos(word):
     tag = nltk.pos_tag([word])[0][1][0].upper()
@@ -209,14 +236,17 @@ class LSA:
     def __init__(self):
         pass
 
-    def load(self, data_file='articles.csv', use_cache=True, cache_file='concept.csv'):
+    def load(self, data_files=['articles.csv', 'recipes.csv'], use_cache=True, cache_file='concept.csv'):
         print('Loading data...', flush=True)
-        self.df_data = load_data('articles.csv')
+        self.df_data = load_data(data_files)
         
         if use_cache and os.path.isfile(cache_file):
             print('Loading concept matrix from "{}"...'.format(cache_file))
             self.df_concept = pd.read_csv(cache_file, index_col=0)
+            # self.df_concept = pd.read_csv(cache_file, index_col=0, usecols=int) .. better?
             self.df_concept.columns = self.df_concept.columns.astype(int)
+            if len(self.df_data) != self.df_concept.shape[0]:
+                raise ValueError('Unexpected concept matrix size! Possibly caused by outdated cache.')
         else:
             print('Preprocessing...', flush=True)
             preproccessed_docs = preprocess_docs(self.df_data)
@@ -243,9 +273,22 @@ class LSA:
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='LSA demo.')
+    parser.add_argument('--no-cache', dest='cache', action='store_false', help='disable cache')
+    parser.add_argument('--cache', dest='cache', action='store_true', help='enable cache')
+    
+    args = parser.parse_args()
+    
     lsa = LSA()
-    lsa.load()
+    lsa.load(use_cache=args.cache)
 
-    df = lsa.get_n_nearest(doc_index=2, n=5)
+    print('Loaded {} documents'.format(len(lsa.df_data)))
+    print('Concept matrix shape: {}'.format(lsa.df_concept.shape))
+
+    i = 2
+    n = 5
+    print('Example for i={} and n={}'.format(i, n))
+    df = lsa.get_n_nearest(doc_index=i, n=n)
 
     print(df)
