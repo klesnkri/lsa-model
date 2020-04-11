@@ -40,7 +40,7 @@ def article(article_id):
     
     article = lsa.df_data.iloc[article_id]
 
-    similar = lsa.get_n_nearest(article_id, n=5)
+    similar = lsa.get_n_nearest(article_id, n=10)
 
 
     return render_template('article.html', article=article, similar=similar)

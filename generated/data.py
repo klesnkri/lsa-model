@@ -50,14 +50,12 @@ df_tf_idf = get_tf_idf(df_reduced)
 display(df_tf_idf)
 
 
-get_concept_by_document(df_tf_idf, True)
+df_concept_by_doc, df_query_projection = transform_to_concept_space(df_tf_idf)
+display(df_concept_by_doc)
+display(df_query_projection)
 
 
-df_concept = get_concept_by_document(df_tf_idf)
-df_concept
-
-
-best_match = get_n_nearest(df_concept, 2, 3)
+best_match = get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, 2, 10)
 best_match
 
 

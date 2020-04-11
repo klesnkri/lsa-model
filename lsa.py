@@ -191,9 +191,13 @@ def custom_svd(A, full_matrices=True):
     return U, np.array(s_eigen), V
 
 
-def get_concept_by_document(df_tf_idf, customSVD = False):
+def transform_to_concept_space(df_tf_idf, k = 200, customSVD = False):
     '''Transform data to concept space.
+    k : number of concepts
     '''
+    if k > df_tf_idf.shape[1]:
+        k = df_tf_idf.shape[1]
+    
     values = df_tf_idf.fillna(0).to_numpy()
     
     if customSVD:
@@ -201,10 +205,12 @@ def get_concept_by_document(df_tf_idf, customSVD = False):
     else:
         U, s_eigen, V = np.linalg.svd(values, full_matrices=False)
     
-    S = np.diag(s_eigen)
+    # Get only first k concepts
+    S = np.diag(s_eigen[:k])
     
-    concept_by_document = S @ V.T
-    return pd.DataFrame(concept_by_document)
+    concept_by_document = S @ (V[:,:k]).T
+    query_projection = (U[:,:k] ).T
+    return pd.DataFrame(concept_by_document), pd.DataFrame(query_projection)
 
 
 def cosine_similarity(x, y):
@@ -212,24 +218,26 @@ def cosine_similarity(x, y):
     return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
 
 
-def get_n_nearest(df_concept, i, n=None, min_sim=0):
+def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None, min_sim=0):
     '''Returns most similar (column) vectors to `i`-th vector in `arr`.
     
     Parameters
     ----------
-    df_concept : pd.DataFrame
+    df_concept_by_doc : pd.DataFrame
+    df_query_projection : pd.DataFrame
     i : index of vector to be compared to
     n : return at most `n` vectors
     '''
     
-    src_vector = df_concept[i].copy()
-    df = df_concept.apply(func=cosine_similarity, axis=0, args=(src_vector, ))
+    # If n isn't set set it to number of docs - 1
+    if n == None:
+        n = df_concept_by_doc.shape[1] - 1
     
-    if n:
-        # skip first value - the src_vector itself
-        return df.sort_values(ascending=False)[1:n + 1]
-    else:
-        return df.sort_values(ascending=False)
+    src_vector = df_query_projection.fillna(0).to_numpy() @ (df_tf_idf.fillna(0).to_numpy())[:,i]
+    
+    df = df_concept_by_doc.apply(func=cosine_similarity, axis=0, args=(src_vector, ))
+    
+    return df.sort_values(ascending=False)[1:n + 1]
 
 class LSA:
     '''Wrapper for LSA methods and data.'''
@@ -249,26 +257,40 @@ class LSA:
             if file:
                 self.df_tf_idf.to_csv(file)
 
-    def compute(self, file='concept.csv', read_cache=True):
+    def compute(self, file1='concept_by_doc.csv', file2='query_projection.csv', read_cache=True):
         if read_cache:
-            if not os.path.isfile(file):
-                raise ValueError("Can't read file {}".format(file))
-            self.df_concept = pd.read_csv(file, index_col=0)
+            if not os.path.isfile(file1):
+                raise ValueError("Can't read file {}".format(file1))
+            if not os.path.isfile(file2):
+                raise ValueError("Can't read file {}".format(file2))
+            
+            self.df_concept_by_doc = pd.read_csv(file1, index_col=0)
             # self.df_concept = pd.read_csv(cache_file, index_col=0, usecols=int) .. better?
-            self.df_concept.columns = self.df_concept.columns.astype(int)
-            if len(self.df_data) != self.df_concept.shape[0]:
-                raise ValueError('Unexpected concept matrix size! Possibly caused by outdated cache.')
+            self.df_concept_by_doc.columns = self.df_concept_by_doc.columns.astype(int)
+            
+            self.df_query_projection = pd.read_csv(file2, index_col=0)
+            self.df_query_projection.columns = self.df_query_projection.columns.astype(int)
+            
+            # Number of documents not ok
+            if len(self.df_data) != self.df_concept_by_doc.shape[1]:
+                raise ValueError('Unexpected query concept by document matrix size! Possibly caused by outdated cache.')
+                
+            # Number of terms not ok
+            if self.df_tf_idf.shape[0] != self.df_query_projection.shape[1]:
+                raise ValueError('Unexpected query projection matrix size! Possibly caused by outdated cache.')
         else:
-            self.df_concept = get_concept_by_document(self.df_tf_idf)
-            if file:
-                self.df_concept.to_csv(file, header=True, index=True)
+            self.df_concept_by_doc, self.df_query_projection = transform_to_concept_space(self.df_tf_idf)
+            if file1:
+                self.df_concept_by_doc.to_csv(file1, header=True, index=True)
+            if file2:
+                self.df_query_projection.to_csv(file2, header=True, index=True)
 
     def load(self, read_cache=True):
         self.preprocess(read_cache=read_cache)
         self.compute(read_cache=read_cache)       
         
     def get_n_nearest(self, doc_index, n):
-        best_match = get_n_nearest(self.df_concept, doc_index, n)
+        best_match = get_n_nearest(self.df_tf_idf, self.df_concept_by_doc, self.df_query_projection, doc_index, n)
 
         df = self.df_data.iloc[best_match.index].copy()
         df['similarity'] = best_match
@@ -295,3 +317,4 @@ if __name__ == "__main__":
     df = lsa.get_n_nearest(doc_index=i, n=n)
 
     print(df)
+
