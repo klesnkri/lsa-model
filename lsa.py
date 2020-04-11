@@ -237,14 +237,14 @@ def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None, 
     
     df = df_concept_by_doc.apply(func=cosine_similarity, axis=0, args=(src_vector, ))
     
-    return df.sort_values(ascending=False)[1:n + 1]
+    return df.sort_values(ascending=False)[:n]
 
 class LSA:
     '''Wrapper for LSA methods and data.'''
     def __init__(self, data_files=['all_the_news_1000_articles.csv']):
         self.df_data = load_data(data_files)
 
-    def preprocess(self, file='tf_idf.csv', read_cache=True, max_df=0.75, min_df=0.05, max_terms=1200):
+    def preprocess(self, file='tf_idf.csv', read_cache=True, max_df=0.75, min_df=0.05, max_terms=2000):
         if read_cache:
             if not os.path.isfile(file):
                 raise ValueError("Can't read file {}".format(file))
