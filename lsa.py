@@ -248,7 +248,8 @@ class LSA:
         if read_cache:
             if not os.path.isfile(file):
                 raise ValueError("Can't read file {}".format(file))
-            self.df_tf_idf = pd.read_csv(file)
+            self.df_tf_idf = pd.read_csv(file, index_col=0)
+            self.df_tf_idf.columns = self.df_tf_idf.columns.astype(int)
         else:
             df_words = preprocess_docs(self.df_data)
             df_frequency = get_term_by_document_frequency(df_words)
