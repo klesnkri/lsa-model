@@ -76,7 +76,7 @@ def preprocess_docs(docs, use_lemmatizer=True, remove_numbers=True):
     
     # tqdm displays progress bar
     for row in tqdm(docs.itertuples(index=True, name='Doc'), total=len(docs)):
-        text = row.text
+        text = row.content
         
         if remove_numbers:
             text = re.sub(r'\d+', '', text)
@@ -241,7 +241,7 @@ def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None, 
 
 class LSA:
     '''Wrapper for LSA methods and data.'''
-    def __init__(self, data_files=['articles.csv', 'recipes.csv']):
+    def __init__(self, data_files=['all_the_news_1000_articles.csv']):
         self.df_data = load_data(data_files)
 
     def preprocess(self, file='tf_idf.csv', read_cache=True, max_df=0.75, min_df=0.05, max_terms=1200):
