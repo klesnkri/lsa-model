@@ -229,13 +229,16 @@ def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None, 
     n : return at most `n` vectors
     '''
     
-    # If n isn't set set it to number of docs - 1
-    if n == None:
-        n = df_concept_by_doc.shape[1] - 1
-    
     src_vector = df_query_projection.fillna(0).to_numpy() @ (df_tf_idf.fillna(0).to_numpy())[:,i]
     
     df = df_concept_by_doc.apply(func=cosine_similarity, axis=0, args=(src_vector, ))
+    
+    # Drop column corresponding to the same index
+    df = df.drop(df.index[i])
+    
+    # Set n
+    if n == None or n > df.shape[0]:
+        n = df.shape[0]
     
     return df.sort_values(ascending=False)[:n]
 
