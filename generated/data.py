@@ -50,9 +50,11 @@ df_tf_idf = get_tf_idf(df_reduced)
 display(df_tf_idf)
 
 
-df_concept_by_doc, df_query_projection = transform_to_concept_space(df_tf_idf)
+df_concept_by_doc, df_query_projection = transform_to_concept_space(df_tf_idf,20)
 display(df_concept_by_doc)
-display(df_query_projection)
+pd.set_option('max_columns', None)
+display(pd.DataFrame(df_concept_by_doc.idxmax()).transpose())
+#display(df_query_projection)
 
 
 best_match = get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, 2, 10)

@@ -191,7 +191,7 @@ def custom_svd(A, full_matrices=True):
     return U, np.array(s_eigen), V
 
 
-def transform_to_concept_space(df_tf_idf, k = 200, customSVD = False):
+def transform_to_concept_space(df_tf_idf, k=20, customSVD = False):
     '''Transform data to concept space.
     k : number of concepts
     '''
