@@ -1,6 +1,6 @@
 # LSA demo
 
-### Installation
+## Installation
 
 ```
 $ ./init.sh
@@ -8,34 +8,34 @@ $ ./init.sh
 
 Install packages as needed on errors and rerun init.
 
-### Getting started
+## Getting started
 
-Running the server
+### Running the server
 
 ```
 $ ./run.sh # displays address and port of server (e.g. localhost:5000)
 ```
 
-Modifying server data
+### Modifying server data
 
 1. replace data in `server/data`
 2. update source code to reflect changes
 3. recompute LSA (see below)
 
-Modifying LSA parameters
+### Modifying LSA parameters
 
 1. modify parameters
    - either in `server/__init__.py` in function `update_lsa` (preferred)
    - or directly in code
 2. recompute LSA (see below)
 
-Recomputing LSA 
+### Recomputing LSA 
 
 ```
 $ flask update # may take some time
 ```
 
-### Project structure
+## Project structure
 
 ```
 ├── lsa                # LSA package
@@ -50,7 +50,8 @@ $ flask update # may take some time
 │   ├── images
 │   ├── cache                    # LSA cache files used by server
 │   ├── data                     # data files used by server
-│   └── views.py
+│   ├── __init__.py              # server initialization + command line interface
+│   └── views.py                 # server request handling
 ├── articles_source.txt          # data sources
 ├── init.sh                      # install this package
 ├── README.md
