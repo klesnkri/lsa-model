@@ -1,5 +1,9 @@
 .ipynb_checkpoints/
 .vscode
 __pycache__/
-concept.csv
-tf_idf.csv
+raw_data
+*egg-info
+.idea
+
+# keep
+!raw_data/.gitkeep

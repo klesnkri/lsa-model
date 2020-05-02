@@ -1,8 +1,12 @@
-import click
+import os.path
 from flask import Blueprint, render_template, url_for, request, g, abort, app, Markup
-from ..lsa import LSA, load_data
+from lsa import LSA
 
 bp = Blueprint('lsa', __name__)
+
+CACHE_DIR = os.path.join(bp.root_path, 'cache')
+DATA_DIR = os.path.join(bp.root_path, 'data')
+
 
 @bp.app_template_filter('nl2p')
 def fix_newlines(text):
@@ -10,6 +14,7 @@ def fix_newlines(text):
     for line in text.split('\n'):
         m += Markup('<p>') + Markup.escape(line) + Markup('</p>')
     return m
+
 
 @bp.app_template_filter('maxlen')
 def maxlen(text, maxlen):
@@ -19,12 +24,10 @@ def maxlen(text, maxlen):
         return text[:maxlen - 3] + '...'
     return text
 
-# bp.before_request(f)
 
 @bp.route('/')
 def index():
-    lsa = LSA()
-    lsa.load()
+    lsa = LSA(DATA_DIR, CACHE_DIR)
     df = lsa.df_data
     cols = ['author', 'title']
 
@@ -33,14 +36,12 @@ def index():
 
 @bp.route('/<int:article_id>')
 def article(article_id):
-    lsa = LSA()
-    lsa.load()
+    lsa = LSA(DATA_DIR, CACHE_DIR)
     if article_id not in lsa.df_data.index:
         abort(404)
     
     article = lsa.df_data.iloc[article_id]
 
     similar = lsa.get_n_nearest(article_id, n=10)
-
 
     return render_template('article.html', article=article, similar=similar)

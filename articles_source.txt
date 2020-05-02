@@ -1,3 +1,2 @@
-https://www.kaggle.com/hsankesara/medium-articles
-https://www.kaggle.com/gjbroughton/christmas-recipes
 https://www.kaggle.com/snapcrack/all-the-news
+https://www.kaggle.com/jrobischon/wikipedia-movie-plots
