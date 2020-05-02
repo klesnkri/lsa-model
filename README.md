@@ -18,7 +18,7 @@ $ ./run.sh # displays address and port of server (e.g. localhost:5000)
 
 ### Modifying server data
 
-1. replace data in `server/data`
+1. replace data inside `server/data/`
 2. update source code to reflect changes
 3. recompute LSA (see below)
 
@@ -47,7 +47,6 @@ $ flask update # may take some time
 ├── server             # demo server
 │   ├── static
 │   ├── templates
-│   ├── images
 │   ├── cache                    # LSA cache files used by server
 │   ├── data                     # data files used by server
 │   ├── __init__.py              # server initialization + command line interface
