@@ -6,6 +6,7 @@ import re
 import math
 import os
 import os.path
+from collections import defaultdict
 from tqdm import tqdm
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
@@ -19,6 +20,12 @@ PROJECTION_FILE = 'query_projection.csv'
 DATA_FILES = ('articles.csv',)
 
 
+tag_map = defaultdict(lambda: wordnet.NOUN)
+tag_map['J'] = wordnet.ADJ
+tag_map['V'] = wordnet.VERB
+tag_map['R'] = wordnet.ADV
+
+
 def load_data(files):
     return pd.concat((pd.read_csv(f, header=0) for f in files), ignore_index=True)
 
@@ -29,53 +36,57 @@ def get_lemmatization_pos(word):
     return tag_dictionary.get(tag, wordnet.NOUN)
 
 
-def preprocess_docs(docs, use_lemmatizer=True, remove_numbers=True):
+def preprocess_docs(df, use_lemmatizer=True, remove_numbers=True):
     """Tokenize and preprocess documents.
 
     Does lemmatization/stemming. Removes stopwords.
 
     Parameters
     ----------
-    docs : pd.DataFrame
+    df : pd.DataFrame
     use_lemmatizer : bool
                      Uses lemmatizer if True, otherwise uses stemmer.
     remove_numbers : bool
     """
     preprocessed_docs = []
-    
+
     # English stop words list
-    en_stop = set(stopwords.words('english'))
-    
+    stops = set(string.punctuation).union(set(stopwords.words('english')))
+
     # Word tokenizer that removes punctuation
     tokenizer = RegexpTokenizer(r'\w+')
-    
+
+    tag_dictionary = {"J": wordnet.ADJ, "N": wordnet.NOUN, "V": wordnet.VERB, "R": wordnet.ADV}
+
+    if remove_numbers:
+        df['content'] = df['content'].apply(lambda text: re.sub(r'\d+', '', text))
+
+    # https://stackoverflow.com/questions/41674573/how-to-apply-pos-tag-sents-to-pandas-dataframe-efficiently
+    texts = df['content'].tolist()
     # lemmatizer / Stemmer
     if use_lemmatizer:
         lemmatizer = WordNetLemmatizer()
+
+        tagged_texts = nltk.pos_tag_sents(map(tokenizer.tokenize, texts))
+        # for each row
+        #     get word and it's tag
+        #     lookup wordnet tag first letter in dictionary to get word type
+        #     lemmatize
+        tokens = [[lemmatizer.lemmatize(word, tag_dictionary.get(tag[0], wordnet.NOUN)) for word, tag in row] for
+                  row in tagged_texts]
     else:
         stemmer = SnowballStemmer("english")
-    
-    # tqdm displays progress bar
-    for row in tqdm(docs.itertuples(index=True, name='Doc'), total=len(docs)):
-        text = row.content
-        
-        if remove_numbers:
-            text = re.sub(r'\d+', '', text)
-        
-        text_words = tokenizer.tokenize(text)
-        
-        if use_lemmatizer:
-            text_words = [lemmatizer.lemmatize(word.lower(), get_lemmatization_pos(word.lower())) for word in text_words
-                          if word not in string.punctuation and word.lower() not in en_stop]
-        else:
-            text_words = [stemmer.stem(word.lower()) for word in text_words
-                          if word not in string.punctuation and word.lower() not in en_stop]
-        
-        preprocessed_docs.append({'words': text_words})
-    
-    print()  # fix missing newline from tqdm
 
-    return pd.DataFrame(preprocessed_docs)
+        tokens = map(tokenizer.tokenize, texts)
+        tokens = [[stemmer.stem(word) for word in row] for row in tokens]
+
+    df['tokens'] = tokens
+    # to lowercase
+    df['tokens'] = df['tokens'].map(lambda row: list(map(str.lower, row)))
+    # remove stopwords
+    df['tokens'] = df['tokens'].apply(lambda r: list(filter(lambda t: t not in stops, r)))
+
+    return df
 
 
 def get_term_by_document_frequency(preprocessed_docs):
@@ -83,11 +94,11 @@ def get_term_by_document_frequency(preprocessed_docs):
     
     for index, row in preprocessed_docs.iterrows():
         doc_id = index
-        doc_words = row['words']
+        doc_words = row['tokens']
         
         document_by_term[doc_id] = {}
         
-        for word in set(row['words']):
+        for word in set(row['tokens']):
             document_by_term[doc_id][word] = doc_words.count(word)
 
     return pd.DataFrame(document_by_term)

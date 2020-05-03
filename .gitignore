@@ -4,6 +4,7 @@ __pycache__/
 raw_data
 *egg-info
 .idea
+test.ipynb
 
 # keep
 !raw_data/.gitkeep

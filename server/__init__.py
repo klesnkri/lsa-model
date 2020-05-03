@@ -1,6 +1,7 @@
 import os
 import os.path
 import json
+import time
 from flask import Flask
 from lsa import compute, preprocess
 
@@ -30,9 +31,14 @@ def create_app():
             config = json.load(f)
         preprocess_cfg = config['preprocess']
         compute_cfg = config['compute']
+        start = time.time()
         df_tf_idf = preprocess(views.DATA_DIR, views.CACHE_DIR, **preprocess_cfg)
+        checkpoint = time.time()
         compute(df_tf_idf, cache_dir=views.CACHE_DIR, **compute_cfg)
+        end = time.time()
         print('Done')
+        print('Preprocessing took {:4.1f} seconds.'.format(checkpoint - start))
+        print('Compute took       {:4.1f} seconds.'.format(end - checkpoint))
 
     return app
 

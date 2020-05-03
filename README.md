@@ -24,6 +24,7 @@ $ ./run.sh # displays address and port of server (e.g. localhost:5000)
 
 ### Modifying LSA parameters
 
+0. `$ export FLASK_APP=server` # if not already set
 1. modify values in `server/lsa_config.json`
 2. recompute LSA - `$ flask update`
 
