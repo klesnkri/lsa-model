@@ -6,8 +6,6 @@ import re
 import math
 import os
 import os.path
-from collections import defaultdict
-from tqdm import tqdm
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk.stem import WordNetLemmatizer 
@@ -18,12 +16,6 @@ TF_IDF_FILE = 'tf_idf.csv'
 CONCEPT_FILE = 'concept_by_doc.csv'
 PROJECTION_FILE = 'query_projection.csv'
 DATA_FILES = ('articles.csv',)
-
-
-tag_map = defaultdict(lambda: wordnet.NOUN)
-tag_map['J'] = wordnet.ADJ
-tag_map['V'] = wordnet.VERB
-tag_map['R'] = wordnet.ADV
 
 
 def load_data(files):
