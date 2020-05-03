@@ -1,4 +1,5 @@
 import os.path
+import json
 from flask import Blueprint, render_template, url_for, request, g, abort, app, Markup
 from lsa import LSA
 
@@ -6,6 +7,15 @@ bp = Blueprint('lsa', __name__)
 
 CACHE_DIR = os.path.join(bp.root_path, 'cache')
 DATA_DIR = os.path.join(bp.root_path, 'data')
+LSA_CONFIG_FILE = 'lsa_config.json'
+LSA_CONFIG_PATH = os.path.join(bp.root_path, LSA_CONFIG_FILE)
+
+
+def get_words():
+    lsa = LSA(DATA_DIR, CACHE_DIR)
+    df = lsa.df_tf_idf
+    words = df.index
+    return words
 
 
 @bp.app_template_filter('nl2p')
@@ -45,3 +55,12 @@ def article(article_id):
     similar = lsa.get_n_nearest(article_id, n=10)
 
     return render_template('article.html', article=article, similar=similar)
+
+
+@bp.route('/config')
+def display_config():
+    if not os.path.isfile(LSA_CONFIG_PATH):
+        abort(404)
+    with open(LSA_CONFIG_PATH, 'r') as f:
+        config = json.load(f)
+    return config

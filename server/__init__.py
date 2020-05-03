@@ -4,8 +4,6 @@ import json
 from flask import Flask
 from lsa import compute, preprocess
 
-LSA_CONFIG_FILE = 'lsa_config.json'
-
 
 def create_app():
     """Create and configure an instance of the Flask application."""
@@ -23,13 +21,12 @@ def create_app():
     @app.cli.command("update")
     def update_lsa():
         """Recompute LSA"""
-        lsa_config_path = os.path.join(views.bp.root_path, LSA_CONFIG_FILE)
-        print('Loading config from "{}"'.format(lsa_config_path), flush=True)
-        if not os.path.isfile(lsa_config_path):
-            raise ValueError('Missing config file "{}".'.format(os.path.abspath(lsa_config_path)))
+        print('Loading config from "{}"'.format(views.LSA_CONFIG_PATH), flush=True)
+        if not os.path.isfile(views.LSA_CONFIG_PATH):
+            raise ValueError('Missing config file "{}".'.format(os.path.abspath(views.LSA_CONFIG_PATH)))
 
         print('Recomputing LSA, this may take some time', flush=True)
-        with open(lsa_config_path, 'r') as f:
+        with open(views.LSA_CONFIG_PATH, 'r') as f:
             config = json.load(f)
         preprocess_cfg = config['preprocess']
         compute_cfg = config['compute']
