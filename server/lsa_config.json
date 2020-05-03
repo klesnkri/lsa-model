@@ -7,7 +7,7 @@
     "remove_numbers": true
   },
   "compute": {
-    "k": 20,
+    "k": 30,
     "customSVD": false
   }
 }
