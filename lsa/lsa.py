@@ -220,16 +220,20 @@ def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None, 
     return df.sort_values(ascending=False)[:n]
 
 
-def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=0.05, max_terms=2000):
+def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=0.05, max_terms=2000,
+               use_lemmatizer=True, remove_numbers=True):
     """Calculate tf-idf for `data_files` and reduce word count based on arguments. Saves output inside `cache_dir`.
 
     Parameters
     ----------
-    data_files : file paths
+    data_dir : str
+            data files dir path
     cache_dir : str
     max_df : float
     min_df : float
     max_terms : int
+    use_lemmatizer : bool
+    remove_numbers : bool
 
     Returns
     -------
@@ -237,7 +241,7 @@ def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=0.05, max
     """
     data_files = [os.path.join(data_dir, f) for f in DATA_FILES]
     df_data = load_data(data_files)
-    df_words = preprocess_docs(df_data)
+    df_words = preprocess_docs(df_data, use_lemmatizer=use_lemmatizer, remove_numbers=remove_numbers)
     df_frequency = get_term_by_document_frequency(df_words)
     df_reduced = reduce_terms(df_frequency, max_df=max_df, min_df=min_df, max_terms=max_terms)
     df_tf_idf = get_tf_idf(df_reduced)
@@ -249,7 +253,7 @@ def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=0.05, max
     return df_tf_idf
 
 
-def compute(df_tf_idf, k=20, cache_dir='cache'):
+def compute(df_tf_idf, k=20, cache_dir='cache', customSVD=False):
     """Transform documents to concept space. Saves output inside `cache_dir`.
 
     Parameters
@@ -258,12 +262,13 @@ def compute(df_tf_idf, k=20, cache_dir='cache'):
     k : int
         Number of concepts.
     cache_dir : str
+    customSVD : bool
 
     Returns
     -------
     (pd.DataFrame, pd.DataFrame) with (concept_by_doct and query_projection)
     """
-    df_concept_by_doc, df_query_projection = transform_to_concept_space(df_tf_idf, k)
+    df_concept_by_doc, df_query_projection = transform_to_concept_space(df_tf_idf, k=k, customSVD=customSVD)
 
     out_file_concept = os.path.join(cache_dir, CONCEPT_FILE)
     out_file_projection = os.path.join(cache_dir, PROJECTION_FILE)

@@ -10,4 +10,5 @@ setup(
     long_description=long_description,
     author="David Mašek, Kristýna Klesnilová",
     packages=["lsa"],
+    install_requires=['numpy', 'pandas', 'nltk', 'tqdm']
 )
