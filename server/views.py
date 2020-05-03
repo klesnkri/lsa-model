@@ -12,17 +12,30 @@ LSA_CONFIG_PATH = os.path.join(bp.root_path, LSA_CONFIG_FILE)
 
 
 def get_words():
+    """Return words contained in tf-idf matrix after filtration - i.e. words used by LSA."""
     lsa = LSA(DATA_DIR, CACHE_DIR)
     df = lsa.df_tf_idf
     words = df.index
-    return words
+    return set(words)
+
+
+@bp.app_template_filter('highlight')
+def highlight_words(text):
+    words = get_words()
+    out = []
+    for word in text.split(' '):
+        if word in words:
+            out.append(Markup('<b>') + word + Markup('</b>'))
+        else:
+            out.append(word)
+    return Markup(' '.join(out))
 
 
 @bp.app_template_filter('nl2p')
 def fix_newlines(text):
     m = Markup()
     for line in text.split('\n'):
-        m += Markup('<p>') + Markup.escape(line) + Markup('</p>')
+        m += Markup('<p>') + line + Markup('</p>')
     return m
 
 
