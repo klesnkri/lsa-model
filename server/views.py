@@ -24,6 +24,7 @@ def highlight_words(text):
     words = get_words()
     out = []
     for word in text.split(' '):
+        # @TODO - add stemming or something? currently doesn't match correctly
         if word in words:
             out.append(Markup('<b>') + word + Markup('</b>'))
         else:
@@ -77,3 +78,9 @@ def display_config():
     with open(LSA_CONFIG_PATH, 'r') as f:
         config = json.load(f)
     return config
+
+
+@bp.route('/debug')
+def debug():
+    lsa = LSA(DATA_DIR, CACHE_DIR)
+    return '<br>'.join(lsa.df_tf_idf.index)
