@@ -15,7 +15,7 @@ from nltk.tokenize import RegexpTokenizer
 TF_IDF_FILE = 'tf_idf.csv'
 CONCEPT_FILE = 'concept_by_doc.csv'
 PROJECTION_FILE = 'query_projection.csv'
-DATA_FILES = ('articles.csv',)
+DATA_FILES = ('plots.csv',)
 
 
 def load_data(files):
@@ -290,8 +290,8 @@ class LSA:
     df_concept_by_doc: pd.DataFrame
     df_query_projection: pd.DataFrame
 
-    def __init__(self, data_dir='data', cache_dir='cache'):
-        data_files = [os.path.join(data_dir, f) for f in DATA_FILES]
+    def __init__(self, data_dir='data', cache_dir='cache', data_files=DATA_FILES):
+        data_files = [os.path.join(data_dir, f) for f in data_files]
         tf_idf_file = os.path.join(cache_dir, TF_IDF_FILE)
         concept_file = os.path.join(cache_dir, CONCEPT_FILE)
         projection_file = os.path.join(cache_dir, PROJECTION_FILE)

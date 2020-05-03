@@ -16,7 +16,7 @@
 <h2>Articles</h2>
 <ol>
 {% for row in articles.itertuples(index=True) %}
-  <li><a href="{{ url_for('lsa.article', article_id=row.Index) }}">{{ row.title }}</a></li>
+  <li><a href="{{ url_for('lsa.article', article_id=row.Index) }}">{{ row.author }} - {{ row.title }}</a></li>
 {% endfor %}
 </ol>
 {% endblock %}

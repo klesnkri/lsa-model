@@ -27,7 +27,7 @@ def select_plots(output_file, min_year=1990, max_rows=1000):
     df = df.sort_values('movies', ascending=False)[:max_rows]
 
     # for compatibility with current code
-    df.rename(columns={
+    df = df.rename(columns={
         'Title': 'title',
         'Director': 'author',
         'Wiki Page': 'link',
