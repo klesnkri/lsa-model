@@ -1,0 +1,13 @@
+{
+  "preprocess": {
+    "max_df": 0.75,
+    "min_df": 0.05,
+    "max_terms": 2000,
+    "use_lemmatizer": true,
+    "remove_numbers": true
+  },
+  "compute": {
+    "k": 20,
+    "customSVD": false
+  }
+}

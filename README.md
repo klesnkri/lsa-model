@@ -20,16 +20,14 @@ $ ./run.sh # displays address and port of server (e.g. localhost:5000)
 
 1. replace data inside `server/data/`
 2. update source code to reflect changes
-3. recompute LSA (see below)
+3. recompute LSA - `$ flask update`
 
 ### Modifying LSA parameters
 
-1. modify parameters
-   - either in `server/__init__.py` in function `update_lsa` (preferred)
-   - or directly in code
-2. recompute LSA (see below)
+1. modify values in `server/lsa_config.json`
+2. recompute LSA - `$ flask update`
 
-### Recomputing LSA 
+### Initializing/Recomputing LSA 
 
 ```
 $ flask update # may take some time
@@ -49,7 +47,8 @@ $ flask update # may take some time
 │   ├── templates
 │   ├── cache                    # LSA cache files used by server
 │   ├── data                     # data files used by server
-│   ├── __init__.py              # server initialization + command line interface
+│   ├── __init__.py              # server + CLI initialization
+│   ├── lsa_config.py            # config file with LSA parameters
 │   └── views.py                 # server request handling
 ├── articles_source.txt          # data sources
 ├── init.sh                      # install this package
