@@ -190,8 +190,9 @@ def transform_to_concept_space(df_tf_idf, k, customSVD=False):
     
     # Get only first k concepts
     S = np.diag(s_eigen[:k])
-    
-    concept_by_document = S @ (V[:, :k]).T
+
+    # concept_by_document = S @ (V[:, :k]).T
+    concept_by_document = S @ (V[:k, :])
     query_projection = (U[:, :k]).T
     return pd.DataFrame(concept_by_document), pd.DataFrame(query_projection)
 
