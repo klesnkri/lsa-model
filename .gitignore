@@ -5,6 +5,8 @@ raw_data
 *egg-info
 .idea
 test.ipynb
+*Untitled.ipynb
+*tmp.csv
 
 # keep
 !raw_data/.gitkeep
