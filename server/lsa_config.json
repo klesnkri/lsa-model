@@ -1,8 +1,8 @@
 {
   "preprocess": {
-    "max_df": 0.60,
+    "max_df": 0.50,
     "min_df": 0.00,
-    "max_terms": 2500,
+    "max_terms": 5000,
     "use_lemmatizer": true,
     "remove_numbers": true
   },
