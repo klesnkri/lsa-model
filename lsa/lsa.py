@@ -132,20 +132,12 @@ def get_tf_idf(df_reduced):
 
     df = df.drop('doc_frequency', axis=1)
     # tf := word frequency / total frequency
-    # @TODO: amax? vs sum?
-    # df.loc['total_words'] = df.sum()
-    # df = df / df.loc['total_words']
-    # df = df.drop('total_words')
-
-    df['max_freq'] = df.max(axis=1)
-    df = df.iloc[:, :-1].div(df['max_freq'], axis=0)
-
-    corpus_size = df.shape[1]
+    df.loc['total_words'] = df.sum()
+    df = df / df.loc['total_words']
+    df = df.drop('total_words')
 
     # idf := log ( len(all_documents) / len(documents_containing_word) )
     # doc frequency was already computed in previous step - reuse
-    # @TODO which is correct? - we're already dividing by corpus size in reduce_terms
-    # df['idf'] = np.log(corpus_size / df_reduced['doc_frequency'])
     df['idf'] = np.log(1 / df_reduced['doc_frequency'])
     
     # tf-idf := tf * idf
