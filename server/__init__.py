@@ -3,8 +3,9 @@ import os.path
 import json
 import time
 from pprint import pprint
+import click
 from flask import Flask
-from lsa import compute, preprocess
+from lsa import LSA, compute, preprocess
 
 
 def create_app():
@@ -21,7 +22,8 @@ def create_app():
     app.register_blueprint(views.bp)
 
     @app.cli.command("update")
-    def update_lsa():
+    @click.option('-p/-c', '--preprocess/--compute-only', 'do_preprocess', default=True)
+    def update_lsa(do_preprocess):
         """Recompute LSA"""
         print('> Loading config from "{}"'.format(views.LSA_CONFIG_PATH), flush=True)
         if not os.path.isfile(views.LSA_CONFIG_PATH):
@@ -33,7 +35,11 @@ def create_app():
         preprocess_cfg = config['preprocess']
         compute_cfg = config['compute']
         start = time.time()
-        df_tf_idf = preprocess(views.DATA_DIR, views.CACHE_DIR, **preprocess_cfg)
+        if do_preprocess:
+            df_tf_idf = preprocess(views.DATA_DIR, views.CACHE_DIR, **preprocess_cfg)
+        else:
+            lsa = LSA(views.DATA_DIR, views.CACHE_DIR)
+            df_tf_idf = lsa.df_tf_idf
         checkpoint = time.time()
         compute(df_tf_idf, cache_dir=views.CACHE_DIR, **compute_cfg)
         end = time.time()
