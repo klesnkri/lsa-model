@@ -144,7 +144,9 @@ def get_tf_idf(df_reduced):
 
     # idf := log ( len(all_documents) / len(documents_containing_word) )
     # doc frequency was already computed in previous step - reuse
-    df['idf'] = np.log(corpus_size / df_reduced['doc_frequency'])
+    # @TODO which is correct? - we're already dividing by corpus size in reduce_terms
+    # df['idf'] = np.log(corpus_size / df_reduced['doc_frequency'])
+    df['idf'] = np.log(1 / df_reduced['doc_frequency'])
     
     # tf-idf := tf * idf
     _cols = df.columns.difference(['idf', 'doc_frequency'])
