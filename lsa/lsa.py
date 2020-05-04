@@ -96,7 +96,7 @@ def get_term_by_document_frequency(preprocessed_docs):
     return pd.DataFrame(document_by_term)
 
 
-def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
+def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None, keep_less_freq=False):
     """Remove unimportant terms from term-by-document matrix.
 
     Parameters
@@ -108,6 +108,8 @@ def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
              Terms that appear in less % of documents will be ignored
     max_terms : int , None
                 If not None, only top `max_terms` terms will be returned.
+    keep_less_freq : bool
+                Decides wherever to keep most frequent or least frequent words when `max_terms` > len.
     """
     df = df_frequency.copy()
     corpus_size = df.shape[1]
@@ -120,9 +122,9 @@ def reduce_terms(df_frequency, max_df=1, min_df=0, max_terms=None):
     
     if max_terms is not None and max_terms < df.shape[0]:
         df['term_count'] = df_frequency.fillna(0).sum(axis=1)
-        df = df.sort_values('term_count', ascending=False)
+        df = df.sort_values('term_count', ascending=keep_less_freq)
         df = df.head(max_terms)
-        df.drop('term_count',axis=1, inplace=True)
+        df.drop('term_count', axis=1, inplace=True)
     
     return df
 
@@ -224,7 +226,7 @@ def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None, 
 
 
 def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=0.05, max_terms=2000,
-               use_lemmatizer=True, remove_numbers=True):
+               use_lemmatizer=True, remove_numbers=True, keep_less_freq=False):
     """Calculate tf-idf for `data_files` and reduce word count based on arguments. Saves output inside `cache_dir`.
 
     Parameters
@@ -237,6 +239,8 @@ def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=0.05, max
     max_terms : int
     use_lemmatizer : bool
     remove_numbers : bool
+    keep_less_freq : bool
+                Decides wherever to keep most frequent or least frequent words when `max_terms` > len.
 
     Returns
     -------
@@ -246,7 +250,8 @@ def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=0.05, max
     df_data = load_data(data_files)
     df_words = preprocess_docs(df_data, use_lemmatizer=use_lemmatizer, remove_numbers=remove_numbers)
     df_frequency = get_term_by_document_frequency(df_words)
-    df_reduced = reduce_terms(df_frequency, max_df=max_df, min_df=min_df, max_terms=max_terms)
+    df_reduced = reduce_terms(df_frequency, max_df=max_df, min_df=min_df, max_terms=max_terms,
+                              keep_less_freq=keep_less_freq)
     df_tf_idf = get_tf_idf(df_reduced)
 
     out_file = os.path.join(cache_dir, TF_IDF_FILE)
