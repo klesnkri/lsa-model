@@ -21,15 +21,17 @@ def get_words():
 
 @bp.app_template_filter('highlight')
 def highlight_words(text):
-    words = get_words()
-    out = []
-    for word in text.split(' '):
-        # @TODO - add stemming or something? currently doesn't match correctly
-        if word.lower() in words:
-            out.append(Markup('<b>') + word + Markup('</b>'))
-        else:
-            out.append(word)
-    return Markup(' '.join(out))
+    # disable @TODO: probably just remove
+    return text
+    # words = get_words()
+    # out = []
+    # for word in text.split(' '):
+    #     # @TODO - add stemming or something? currently doesn't match correctly
+    #     if word.lower() in words:
+    #         out.append(Markup('<b>') + word + Markup('</b>'))
+    #     else:
+    #         out.append(word)
+    # return Markup(' '.join(out))
 
 
 @bp.app_template_filter('nl2p')
