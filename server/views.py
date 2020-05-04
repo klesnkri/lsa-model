@@ -25,7 +25,7 @@ def highlight_words(text):
     out = []
     for word in text.split(' '):
         # @TODO - add stemming or something? currently doesn't match correctly
-        if word in words:
+        if word.lower() in words:
             out.append(Markup('<b>') + word + Markup('</b>'))
         else:
             out.append(word)
