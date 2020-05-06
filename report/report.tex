@@ -57,7 +57,7 @@
 
 \section{Popis projektu}
 
-V tomto projektu implementujeme LSI vektorový model sloužící k podobnostnímu vyhledávání v databázi textových dokumentů. Tuto funkcionalitu následně vizualizujeme pomocí webového interface, který uživateli umožňuje procházet databázi článků na základě doporučování nejpodobnějších článků k právě čtenému.
+V tomto projektu implementujeme LSI vektorový model sloužící k podobnostnímu vyhledávání v databázi anglických textových dokumentů. Tuto funkcionalitu následně vizualizujeme pomocí webového interface, který uživateli umožňuje procházet databázi článků na základě doporučování nejpodobnějších článků k právě čtenému.
 
 \bigskip 
 
@@ -65,7 +65,8 @@ V experimentální části projektu jsme se dále zaměřili na:
 \begin{itemize}
 	\item Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze
 	\item Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym
-	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu...)
+	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu...)
+	\item Jak se změní výsledky při použití jiného vzorce na výpočet vah termů
 \end{itemize}
 
 \bigskip 
@@ -74,7 +75,30 @@ Celý náš projekt je volně dostupný na: (Odkaz na gitlab?).
 
 \section{Způsob řešení}
 
-\subsection{Preprocessing}
+\subsection{Preprocesing dokumentů}
+
+Jako první v naší aplikaci začínáme s preprocesingem dokumentů. Slova z jednotlivých dokumentů převedeme na malá písmena a odstraníme z nich nevýznamová slova a interpunkci. K identifikaci nevýznamových slov používáme seznam anglických nevýznamových slov. Jako parametr programu posíláme také, zda má z dokumentů odstranit i číslovky. Následně na zbylé termy aplikujeme stemming či lemmatizaci. Tím se snažíme slova, která mají stejný slovní základ, vyjádřit pouze jedním termem. Stemming to dělá pomocí algoritmu, kterým odsekává přípony a koncovky slova. Lemmatizace na to jde o něco chytřeji, podle kontextu slova se pokusí určit, o jaký slovní druh se jedná, a podle toho ho zkrátit. Porovnání jejich použití v programu se dále věnujeme v experimentální části.
+
+\subsection{Výpočet vah termů}
+V aplikaci vytváříme term-by-document matici, která bude mít v řádcích jednotlivé termy a ve sloupcích jejich váhy v jednotlivých dokumentech.
+
+\bigskip 
+
+Začneme tím, že si vytvoříme matici počtu výskytů jednotlivých termů v jednotlivých dokumentech. Počet termů v této matici poté dále zredukujeme, aby úloha byla výpočetně řešitelná v rozumném čase. Funkci pro redukci termů posíláme následující parametry:
+\begin{itemize}
+	\item \emph{max\_df} - termy nacházející se ve více \% dokumentů, než udává číslo 100 * \emph{max\_df}, z matice odstraníme
+	\item \emph{min\_df} - termy nacházející se v méně nebo stejně dokumentech, než udává číslo \emph{min\_df}, z matice odstraníme
+	\item \emph{max\_terms} - maximální počet termů, které si v aplikaci necháme
+	\item \emph{keep\_less\_freq} - udává, zda si při výběru \emph{max\_terms} termů nechat ty nejméně či nejvíce často zastoupené v dokumentech  
+\end{itemize}
+
+\bigskip 
+
+Zkoumání vlivu změny jednotlivých parametrů na výsledek LSI se dále podrobněji věnujeme v experimentální části. V programu vždy nastavujeme \emph{min\_df} alespoň na 1, abychom odstranili termy nacházející se pouze v 1 dokumentu, které nám do LSI nepřidávají žádné užitečné informace. (pravda?)
+
+\bigskip
+
+Z této zredukované matice poté již spočteme term-by-document matici vah termů v jednotlivých dokumentech. Pro výpočet vah jednotlivých termů používáme metodiku tf-idf.
 
 \subsection{Implementace LSI}
 
