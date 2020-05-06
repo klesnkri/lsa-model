@@ -77,10 +77,10 @@ Celý náš projekt je volně dostupný na: (Odkaz na gitlab?).
 
 \subsection{Preprocesing dokumentů}
 
-Jako první v naší aplikaci začínáme s preprocesingem dokumentů. Slova z jednotlivých dokumentů převedeme na malá písmena a odstraníme z nich nevýznamová slova a interpunkci. K identifikaci nevýznamových slov používáme seznam anglických nevýznamových slov. Jako parametr programu posíláme také, zda má z dokumentů odstranit i číslovky. Následně na zbylé termy aplikujeme stemming či lemmatizaci. Tím se snažíme slova, která mají stejný slovní základ, vyjádřit pouze jedním termem. Stemming to dělá pomocí algoritmu, kterým odsekává přípony a koncovky slova. Lemmatizace na to jde o něco chytřeji, podle kontextu slova se pokusí určit, o jaký slovní druh se jedná, a podle toho ho zkrátit. Porovnání jejich použití v programu se dále věnujeme v experimentální části.
+Jako první v naší aplikaci začínáme s preprocesingem dokumentů. Slova z jednotlivých dokumentů převedeme na malá písmena a odstraníme z nich nevýznamová slova a interpunkci. K identifikaci nevýznamových slov používáme seznam anglických nevýznamových slov. Jako parametr programu posíláme také, zda má z dokumentů odstranit i číslovky. Následně na zbylé termy aplikujeme \emph{stemming} či \emph{lemmatizaci}. Tím se snažíme slova, která mají stejný slovní základ, vyjádřit pouze jedním termem. Stemming to dělá pomocí algoritmu, kterým odsekává přípony a koncovky slova. Lemmatizace na to jde o něco chytřeji, podle kontextu slova se pokusí určit, o jaký slovní druh se jedná, a podle toho ho zkrátit.\footnote{nlp.stanford.edu/IR-book/html/htmledition/stemming-and-lemmatization-1.html}   Porovnání jejich použití v programu se dále věnujeme v experimentální části.
 
 \subsection{Výpočet vah termů}
-V aplikaci vytváříme term-by-document matici, která bude mít v řádcích jednotlivé termy a ve sloupcích jejich váhy v jednotlivých dokumentech.
+V aplikaci vytváříme matici $M_w$, která má v řádcích jednotlivé termy a ve sloupcích jejich váhy v jednotlivých dokumentech.
 
 \bigskip 
 
@@ -98,82 +98,103 @@ Zkoumání vlivu změny jednotlivých parametrů na výsledek LSI se dále podro
 
 \bigskip
 
-Z této zredukované matice poté již spočteme term-by-document matici vah termů v jednotlivých dokumentech. Pro výpočet vah jednotlivých termů používáme metodiku tf-idf.
+Z této zredukované matice poté již spočteme matici $M_w$. Pro výpočet vah jednotlivých termů používáme metodiku \emph{tf-idf}. Váhu termu $t_i$ v dokumentu $d_j$ spočítáme podle vzorce:
+
+\begin{align}
+	\begin{split}
+		w_{ij} = tf_{ij} \cdot idf_{ij}
+	\end{split}					
+\end{align}
+
+$tf_{ij}$ reprezentuje četnost termu $t_i$ v dokumentu $d_j$ a spočítá se podle vzorce\footnote{https://en.wikipedia.org/wiki/Tf\%E2\%80\%93idf} :
+
+\begin{align}
+	\begin{split}
+		tf_{ij} = \frac{f_{ij}}{nt_j}
+	\end{split}					
+\end{align}
+
+kde $f_ij$ je četnost výskytu termu $t_i$ v dokumentu $d_j$, kterou normalizujeme číslem $nt_j$ vyjadřujícím celkový počet termů v dokumentu $d_j$. V přednášových slidech je použita normalizace jiná, $tf{ij}$ se tam počítá podle vzorce:
+
+\begin{align}
+	\begin{split}
+		tf_{ij} = \frac{f_{ij}}{max_i\{f_{ij}\}}
+	\end{split}					
+\end{align}
+
+kde $max_i\{f_{ij}\}$ vrací nejvyšší četnost termu $t_i$ přes celou kolekci dokumentů. Tento způsob normalizace nám vrací spíše horší výsledky, jejich porovnáním se zabýváme v experimentální části.
+
+$idf_{ij}$ reprezentuje převrácenou četnost $t_i$ ve všech dokumentech a spočítá se podle vzorce:
+
+\begin{align}
+	\begin{split}
+		idf_{ij} = \log_2 (\frac{n}{df_i}
+	\end{split}					
+\end{align}
+
+kde $n$ je celkový počet dokumentů a $df_i$ reprezentuje celkový počet dokumentů obsahujících term $t_i$.
 
 \subsection{Implementace LSI}
 
+Jakmile máme vytvořenou matici vah termů $M_w$, můžeme přistoupit k samotné implementaci LSI. Princip LSI spočívá v tom, že s pomocí \emph{singulárního rozkladu (SVD)} seskupíme tematicky podobné články do jednotlivých k konceptů. Vlivem počtu konceptů na kvalitu výsledků se dále zabýváme v experimentální sekci.
+
+\bigskip 
+
+Singulární rozklad nám matici $M_w$ rozloží následovně:
+
+\begin{align}
+	\begin{split}
+		M_w = U \cdot S \cdot V^T
+	\end{split}					
+\end{align}
+
+kde řádky matice $U$ jsou obrazy řádků matice $M_w$, sloupce matice $V$ jsou obrazy sloupců matice $M_w$ a matice $S$ obsahuje na diagonále $M_w$ v sestupném pořadí. Z těchto matic získáme \emph{concept-by-document} matici $M_{cd}$ jako:
+
+\begin{align}
+	\begin{split}
+		M_{cd} = S \cdot V^T
+	\end{split}					
+\end{align}
+
+a matici projekce dotazu do prostoru konceptů $M_q$ jako:
+
+\begin{align}
+	\begin{split}
+		M_q = U^T
+	\end{split}					
+\end{align}
+
 \subsection{Vyhodnocení dotazu}
+
+Při dotazu na nejpodobnější dokumenty k dokumentu $d_j$ převedeme dotaz do prostoru konceptů na vektor $V_c$ pomocí vzorce:
+
+\begin{align}
+	\begin{split}
+		V_c = M_{q_{[k,:]}} \cdot M_{w_{:,j}}
+	\end{split}					
+\end{align}
+
+kde $M_{q_{[k,:]}}$ značí prvních k řádků matice $M_q$ kde k je počet konceptů a $M_{w_{:,j}}$ značí j-tý sloupec matice $M_w$. Nenásobíme tedy celou maticí $M_q$, ale pouze její částí podle počtu konceptů.
+
+\bigskip
+
+Vektor $V_c$ poté pomocí \emph{kosinové podobnosti} porovnáme se sloupcovými vektory matice $M_{{cd}_{[k, :]}}$. Používáme tedy opět jen část matice $M_{cd}$ podle počtu konceptů. Indexy nejpodobnějších sloupcových vektorů matice $M_{{cd}_{[k, :]}}$ pak vrátíme jako indexy nejpodobnějších dokumentů k dokumentu dotazu $d_j$.
 
 \section{Implementace}
 
-\subsection{Identify the author of Equation \ref{eq:bayes} below and briefly describe it in English.}
+Celý projekt jsme programovali v jazyce Python. Práci nám velmi usnadnila jeho knihovna NLTK\footnote{https://www.nltk.org/} nabízející funkce pro práci s přirozeným jazykem. Využili jsme například WordNetLemmatizer pro lemmatizaci či SnowballStemmer pro stemming. Dále jsme v programu hojně využívali Python knihovny pandas\footnote{https://pandas.pydata.org/}  a numpy\footnote{https://numpy.org/}.
 
-\begin{align} 
-	\label{eq:bayes}
-	\begin{split}
-		P(A|B) = \frac{P(B|A)P(A)}{P(B)}
-	\end{split}					
-\end{align}
+\bigskip
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porttitor arcu luctus, imperdiet urna iaculis, mattis eros. Pellentesque iaculis odio vel nisl ullamcorper, nec faucibus ipsum molestie. Sed dictum nisl non aliquet porttitor. Etiam vulputate arcu dignissim, finibus sem et, viverra nisl. Aenean luctus congue massa, ut laoreet metus ornare in. Nunc fermentum nisi imperdiet lectus tincidunt vestibulum at ac elit. Nulla mattis nisl eu malesuada suscipit.
+Ukládání dat v projektu řešíme přes csv soubory, ke kterým přistupujeme přes pandas funkce. V jednom souboru máme uložené články nad kterými provádíme LSI. V dalších souborech pak máme uložené matice, které nám vzniknou při výpočtech, abychom je mohli cachovat a zrychlili tak běh programu.
 
-%------------------------------------------------
+\bigskip
 
-\subsection{Try to make sense of some more equations.}
-
-\begin{align} 
-	\begin{split}
-		(x+y)^3 &= (x+y)^2(x+y)\\
-		&=(x^2+2xy+y^2)(x+y)\\
-		&=(x^3+2x^2y+xy^2) + (x^2y+2xy^2+y^3)\\
-		&=x^3+3x^2y+3xy^2+y^3
-	\end{split}					
-\end{align}
-
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. 
-\begin{align}
-	A = 
-	\begin{bmatrix}
-		A_{11} & A_{21} \\
-		A_{21} & A_{22}
-	\end{bmatrix}
-\end{align}
-Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
-
-%----------------------------------------------------------------------------------------
-%	LIST EXAMPLES
-%----------------------------------------------------------------------------------------
+Procházení článků vizualizujeme v prohlížeči pomocí Flask\footnote{https://flask.palletsprojects.com/en/1.1.x/} web serveru.
 
 \section{Příklad výstupu}
 
-\subsection{Bullet Point List}
 
-\begin{itemize}
-	\item First item in a list 
-		\begin{itemize}
-		\item First item in a list 
-			\begin{itemize}
-			\item First item in a list 
-			\item Second item in a list 
-			\end{itemize}
-		\item Second item in a list 
-		\end{itemize}
-	\item Second item in a list 
-\end{itemize}
-
-%------------------------------------------------
-
-\subsection{Numbered List}
-
-\begin{enumerate}
-	\item First item in a list 
-	\item Second item in a list 
-	\item Third item in a list
-\end{enumerate}
-
-%----------------------------------------------------------------------------------------
-%	TABLE EXAMPLE
-%----------------------------------------------------------------------------------------
 
 \section{Experimentální sekce}
 
