@@ -170,15 +170,15 @@ Při dotazu na nejpodobnější dokumenty k dokumentu $d_j$ převedeme dotaz do 
 
 \begin{align}
 	\begin{split}
-		V_c = M_{q_{[k,:]}} \cdot M_{w_{:,j}}
+		V_c = M_q[k,:] \cdot M_{w_{:,j}}
 	\end{split}					
 \end{align}
 
-kde $M_{q_{[k,:]}}$ značí prvních k řádků matice $M_q$ kde k je počet konceptů a $M_{w_{:,j}}$ značí j-tý sloupec matice $M_w$. Nenásobíme tedy celou maticí $M_q$, ale pouze její částí podle počtu konceptů.
+kde $M_q[k,:]$ značí prvních k řádků matice $M_q$ kde k je počet konceptů a $M_{w_{:,j}}$ značí j-tý sloupec matice $M_w$. Nenásobíme tedy celou maticí $M_q$, ale pouze její částí podle počtu konceptů.
 
 \bigskip
 
-Vektor $V_c$ poté pomocí \emph{kosinové podobnosti} porovnáme se sloupcovými vektory matice $M_{{cd}_{[k, :]}}$. Používáme tedy opět jen část matice $M_{cd}$ podle počtu konceptů. Indexy nejpodobnějších sloupcových vektorů matice $M_{{cd}_{[k, :]}}$ pak vrátíme jako indexy nejpodobnějších dokumentů k dokumentu dotazu $d_j$.
+Vektor $V_c$ poté pomocí \emph{kosinové podobnosti} porovnáme se sloupcovými vektory matice $M_{cd}[k, :]$. Používáme tedy opět jen část matice $M_{cd}$ podle počtu konceptů. Indexy nejpodobnějších sloupcových vektorů matice $M_{cd}[k, :]$ pak vrátíme jako indexy nejpodobnějších dokumentů k dokumentu dotazu $d_j$.
 
 \section{Implementace}
 
