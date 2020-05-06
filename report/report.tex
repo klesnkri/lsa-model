@@ -106,7 +106,7 @@ Z této zredukované matice poté již spočteme matici $M_w$. Pro výpočet vah
 	\end{split}					
 \end{align}
 
-$tf_{ij}$ reprezentuje četnost termu $t_i$ v dokumentu $d_j$ a spočítá se podle vzorce\footnote{https://en.wikipedia.org/wiki/Tf\%E2\%80\%93idf} :
+kde $tf_{ij}$ reprezentuje normalizovanou četnost termu $t_i$ v dokumentu $d_j$ a spočítá se podle vzorce\footnote{https://en.wikipedia.org/wiki/Tf\%E2\%80\%93idf} :
 
 \begin{align}
 	\begin{split}
@@ -114,7 +114,7 @@ $tf_{ij}$ reprezentuje četnost termu $t_i$ v dokumentu $d_j$ a spočítá se po
 	\end{split}					
 \end{align}
 
-kde $f_ij$ je četnost výskytu termu $t_i$ v dokumentu $d_j$, kterou normalizujeme číslem $nt_j$ vyjadřujícím celkový počet termů v dokumentu $d_j$. V přednášových slidech je použita normalizace jiná, $tf{ij}$ se tam počítá podle vzorce:
+kde $f_{ij}$ je četnost výskytu termu $t_i$ v dokumentu $d_j$, kterou normalizujeme číslem $nt_j$ vyjadřujícím celkový počet termů v dokumentu $d_j$. V přednášových slidech je použita normalizace jiná, $tf_{ij}$ se tam počítá podle vzorce:
 
 \begin{align}
 	\begin{split}
@@ -128,7 +128,7 @@ $idf_{ij}$ reprezentuje převrácenou četnost $t_i$ ve všech dokumentech a spo
 
 \begin{align}
 	\begin{split}
-		idf_{ij} = \log_2 (\frac{n}{df_i}
+		idf_{ij} = \log_2 (\frac{n}{df_i})
 	\end{split}					
 \end{align}
 
@@ -136,7 +136,7 @@ kde $n$ je celkový počet dokumentů a $df_i$ reprezentuje celkový počet doku
 
 \subsection{Implementace LSI}
 
-Jakmile máme vytvořenou matici vah termů $M_w$, můžeme přistoupit k samotné implementaci LSI. Princip LSI spočívá v tom, že s pomocí \emph{singulárního rozkladu (SVD)} seskupíme tematicky podobné články do jednotlivých k konceptů. Vlivem počtu konceptů na kvalitu výsledků se dále zabýváme v experimentální sekci.
+Jakmile máme vytvořenou matici vah termů $M_w$, můžeme přistoupit k samotné implementaci LSI. Princip LSI spočívá v tom, že s pomocí \emph{singulárního rozkladu (SVD)} seskupíme tematicky podobné články do jednotlivých $k$ konceptů. Vlivem počtu konceptů na kvalitu výsledků se dále zabýváme v experimentální sekci.
 
 \bigskip 
 
@@ -148,7 +148,7 @@ Singulární rozklad nám matici $M_w$ rozloží následovně:
 	\end{split}					
 \end{align}
 
-kde řádky matice $U$ jsou obrazy řádků matice $M_w$, sloupce matice $V$ jsou obrazy sloupců matice $M_w$ a matice $S$ obsahuje na diagonále $M_w$ v sestupném pořadí. Z těchto matic získáme \emph{concept-by-document} matici $M_{cd}$ jako:
+kde řádky matice $U$ jsou obrazy řádků matice $M_w$, sloupce matice $V$ jsou obrazy sloupců matice $M_w$ a matice $S$ obsahuje na diagonále vlastní čísla $M_w$ v sestupném pořadí. Z těchto matic získáme \emph{concept-by-document} matici $M_{cd}$ jako:
 
 \begin{align}
 	\begin{split}
@@ -174,7 +174,7 @@ Při dotazu na nejpodobnější dokumenty k dokumentu $d_j$ převedeme dotaz do 
 	\end{split}					
 \end{align}
 
-kde $M_q[k,:]$ značí prvních k řádků matice $M_q$ kde k je počet konceptů a $M_{w_{:,j}}$ značí j-tý sloupec matice $M_w$. Nenásobíme tedy celou maticí $M_q$, ale pouze její částí podle počtu konceptů.
+kde $M_q[k,:]$ značí prvních $k$ řádků matice $M_q$ kde $k$ je počet konceptů a $M_{w_{:,j}}$ značí j-tý sloupec matice $M_w$. Nenásobíme tedy celou maticí $M_q$, ale pouze její část podle počtu konceptů.
 
 \bigskip
 
@@ -186,7 +186,7 @@ Celý projekt jsme programovali v jazyce Python. Práci nám velmi usnadnila jeh
 
 \bigskip
 
-Ukládání dat v projektu řešíme přes csv soubory, ke kterým přistupujeme přes pandas funkce. V jednom souboru máme uložené články nad kterými provádíme LSI. V dalších souborech pak máme uložené matice, které nám vzniknou při výpočtech, abychom je mohli cachovat a zrychlili tak běh programu.
+Ukládání dat v projektu řešíme přes CSV soubory, ke kterým přistupujeme přes pandas funkce. V jednom souboru máme uložené články nad kterými provádíme LSI. V dalších souborech pak máme uložené matice, které nám vzniknou při výpočtech, abychom je mohli cachovat a zrychlili tak běh našeho programu.
 
 \bigskip
 
