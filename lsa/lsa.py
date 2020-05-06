@@ -15,7 +15,7 @@ from nltk.tokenize import RegexpTokenizer
 TF_IDF_FILE = 'tf_idf.csv'
 CONCEPT_FILE = 'concept_by_doc.csv'
 PROJECTION_FILE = 'query_projection.csv'
-DATA_FILES = ('plots.csv',)
+DATA_FILES = ('articles.csv',)
 
 
 def load_data(files):
@@ -109,7 +109,7 @@ def reduce_terms(df_frequency, max_df=1.0, min_df=1, max_terms=None, keep_less_f
     max_terms : int , None
                 If not None or 0, only top `max_terms` terms will be returned.
     keep_less_freq : bool
-                Decides wherever to keep most frequent or least frequent words when `max_terms` > len.
+                Decides wherever to keep most frequent or least frequent words when `max_terms` < len.
     """
     df = df_frequency.copy()
     corpus_size = df.shape[1]
