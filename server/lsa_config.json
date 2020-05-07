@@ -8,7 +8,7 @@
     "keep_less_freq": false
   },
   "compute": {
-    "k": 100,
+    "k": 400,
     "customSVD": false
   }
 }
