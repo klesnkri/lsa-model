@@ -170,7 +170,9 @@ def transform_to_concept_space(df_tf_idf, k, customSVD=False):
     """Transform data to concept space.
     k : number of concepts
     """
-    if k > df_tf_idf.shape[1]:
+    
+    # if k == 0 -> k = number of terms, go through documents sequentially
+    if k > df_tf_idf.shape[1] or k == 0:
         k = df_tf_idf.shape[1]
     
     values = df_tf_idf.fillna(0).to_numpy()
@@ -183,8 +185,8 @@ def transform_to_concept_space(df_tf_idf, k, customSVD=False):
     # Get only first k concepts
     S = np.diag(s_eigen[:k])
 
-    # concept_by_document = S @ (V[:, :k]).T
-    concept_by_document = S @ (V[:k, :])
+    # concept_by_document = S @ V[:, :k]
+    concept_by_document = S @ V[:k, :]
     query_projection = (U[:, :k]).T
     return pd.DataFrame(concept_by_document), pd.DataFrame(query_projection)
 
