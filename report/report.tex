@@ -57,15 +57,16 @@
 
 \section{Popis projektu}
 
-V tomto projektu implementujeme LSI vektorový model sloužící k podobnostnímu vyhledávání v databázi anglických textových dokumentů. Tuto funkcionalitu následně vizualizujeme pomocí webového interface, který uživateli umožňuje procházet databázi článků na základě doporučování nejpodobnějších článků k právě čtenému.
+V tomto projektu implementujeme \emph{LSI vektorový model} sloužící k podobnostnímu vyhledávání v databázi anglických textových dokumentů. Tuto funkcionalitu následně vizualizujeme pomocí webového interface, který uživateli umožňuje procházet databázi článků na základě doporučování nejpodobnějších článků k právě čtenému.
 
 \bigskip 
 
 V experimentální části projektu jsme se dále zaměřili na:
 \begin{itemize}
-	\item Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze
+	\item Určení optimálního počtu konceptů
 	\item Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym
-	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu...)
+	\item Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze
+	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu...)
 	\item Jak se změní výsledky při použití jiného vzorce na výpočet vah termů
 \end{itemize}
 
@@ -148,21 +149,27 @@ Singulární rozklad nám matici $M_w$ rozloží následovně:
 	\end{split}					
 \end{align}
 
-kde řádky matice $U$ jsou obrazy řádků matice $M_w$, sloupce matice $V$ jsou obrazy sloupců matice $M_w$ a matice $S$ obsahuje na diagonále vlastní čísla $M_w$ v sestupném pořadí. Z těchto matic získáme \emph{concept-by-document} matici $M_{cd}$ jako:
+kde řádky matice $U$ jsou obrazy řádků matice $M_w$, sloupce matice $V$ jsou obrazy sloupců matice $M_w$ a matice $S$ obsahuje na diagonále \emph{singular values (absolutní hodnoty vlastních čísel)} matice $M_w$ v sestupném pořadí. Z těchto matic získáme \emph{concept-by-document} matici $M_{cd}$ jako:
 
 \begin{align}
 	\begin{split}
-		M_{cd} = S \cdot V^T
+		M_{cd} = S[k,k] \cdot V^T[k,:]
 	\end{split}					
 \end{align}
 
-a matici projekce dotazu do prostoru konceptů $M_q$ jako:
+kde $S[k,k]$ značí prvních $k$ řádků a sloupců matice $S$ a $V^T[k,:]$ značí prvních $k$ řádků matice $V^T$, kde $k$ je počet konceptů. Nenásobíme tedy celou maticí $M_{cd}$, ale pouze její část podle počtu konceptů.
+
+\bigskip
+
+Matici projekce dotazu do prostoru konceptů $M_q$ pak získáme jako:
 
 \begin{align}
 	\begin{split}
-		M_q = U^T
+		M_q = U^T[k,:]
 	\end{split}					
 \end{align}
+
+kde $U^T[k,:]$ značí prvních $k$ řádků matice $U^T$.
 
 \subsection{Vyhodnocení dotazu}
 
@@ -170,86 +177,48 @@ Při dotazu na nejpodobnější dokumenty k dokumentu $d_j$ převedeme dotaz do 
 
 \begin{align}
 	\begin{split}
-		V_c = M_q[k,:] \cdot M_{w_{:,j}}
+		V_c = M_q \cdot M_{w_{:,j}}
 	\end{split}					
 \end{align}
 
-kde $M_q[k,:]$ značí prvních $k$ řádků matice $M_q$ kde $k$ je počet konceptů a $M_{w_{:,j}}$ značí j-tý sloupec matice $M_w$. Nenásobíme tedy celou maticí $M_q$, ale pouze její část podle počtu konceptů.
+kde $M_{w_{:,j}}$ značí j-tý sloupec matice $M_w$.
 
 \bigskip
 
-Vektor $V_c$ poté pomocí \emph{kosinové podobnosti} porovnáme se sloupcovými vektory matice $M_{cd}[k, :]$. Používáme tedy opět jen část matice $M_{cd}$ podle počtu konceptů. Indexy nejpodobnějších sloupcových vektorů matice $M_{cd}[k, :]$ pak vrátíme jako indexy nejpodobnějších dokumentů k dokumentu dotazu $d_j$.
+Vektor $V_c$ poté pomocí \emph{kosinové podobnosti} porovnáme se sloupcovými vektory matice $M_{cd}$. Indexy nejpodobnějších sloupcových vektorů matice $M_{cd}$ pak vrátíme jako indexy nejpodobnějších dokumentů k dokumentu dotazu $d_j$.
 
 \section{Implementace}
 
-Celý projekt jsme programovali v jazyce Python. Práci nám velmi usnadnila jeho knihovna NLTK\footnote{https://www.nltk.org/} nabízející funkce pro práci s přirozeným jazykem. Využili jsme například WordNetLemmatizer pro lemmatizaci či SnowballStemmer pro stemming. Dále jsme v programu hojně využívali Python knihovny pandas\footnote{https://pandas.pydata.org/}  a numpy\footnote{https://numpy.org/}.
+Celý projekt jsme programovali v jazyce \emph{Python}. Práci nám velmi usnadnila jeho knihovna \emph{NLTK}\footnote{https://www.nltk.org/} nabízející rozsáhlou funkcionalitu pro práci s přirozeným jazykem. Využili jsme například \emph{WordNetLemmatizer} pro lemmatizaci či \emph{SnowballStemmer} pro stemming. Dále jsme v programu hojně využívali Python knihovny \emph{pandas}\footnote{https://pandas.pydata.org/} a \emph{numpy}\footnote{https://numpy.org/}.
 
 \bigskip
 
-Ukládání dat v projektu řešíme přes CSV soubory, ke kterým přistupujeme přes pandas funkce. V jednom souboru máme uložené články nad kterými provádíme LSI. V dalších souborech pak máme uložené matice, které nám vzniknou při výpočtech, abychom je mohli cachovat a zrychlili tak běh našeho programu.
+Ukládání dat v projektu řešíme přes CSV soubory, ke kterým přistupujeme přes pandas funkce. V jednom souboru máme uložený dataset nad kterým provádíme LSI. V dalších souborech pak máme uložené matice $M_w$, $M_{cd}$ a $M_q$, abychom je mohli cachovat a přepočítavat jen při změně LSI parametrů, které máme uložené v souboru \emph{server/lsa\_config.json}.
 
 \bigskip
 
-Procházení článků vizualizujeme v prohlížeči pomocí Flask\footnote{https://flask.palletsprojects.com/en/1.1.x/} web serveru.
+Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footnote{https://flask.palletsprojects.com/en/1.1.x/} web serveru. Jako dataset v našem projektu používáme anglicky psané novinové články stažené z \emph{kaggle.com}\footnote{https://www.kaggle.com/snapcrack/all-the-news}. Dataset nepoužíváme celý, vybrali jsme z něj pouze 961 článků.
 
 \section{Příklad výstupu}
 
-
-
 \section{Experimentální sekce}
 
-\begin{table}[h] % [h] forces the table to be output where it is defined in the code (it suppresses floating)
-	\centering % Centre the table
-	\begin{tabular}{l l l}
-		\toprule
-		\textit{Per 50g} & \textbf{Pork} & \textbf{Soy} \\
-		\midrule
-		Energy & 760kJ & 538kJ\\
-		Protein & 7.0g & 9.3g\\
-		Carbohydrate & 0.0g & 4.9g\\
-		Fat & 16.8g & 9.1g\\
-		Sodium & 0.4g & 0.4g\\
-		Fibre & 0.0g & 1.4g\\
-		\bottomrule
-	\end{tabular}
-	\caption{Sausage nutrition.}
-\end{table}
+\subsection{Určení optimálního počtu konceptů}
 
-%------------------------------------------------
+\begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
+	\centering
+	\includegraphics[width=0.5\columnwidth]{singular_values.png}
+	\caption{Důležitost konceptů}
+\end{figure}
 
-\subsection{The table above shows the nutritional consistencies of two sausage types. Explain their relative differences given what you know about daily adult nutritional recommendations.}
+Vezmeme si singular values, které nám vrátil singulární rozklad v rovnici 2.5. Vizualizujeme-li si, jak klesá poměr nejvyšší singular value vůči zbylým singular values, vidíme z toho také, jak klesá důležitost konceptů v datasetu. Počet konceptů $k$ v naší aplikaci tedy podle tohoto grafu určíme jako 400.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porttitor arcu luctus, imperdiet urna iaculis, mattis eros. Pellentesque iaculis odio vel nisl ullamcorper, nec faucibus ipsum molestie. Sed dictum nisl non aliquet porttitor. Etiam vulputate arcu dignissim, finibus sem et, viverra nisl. Aenean luctus congue massa, ut laoreet metus ornare in. Nunc fermentum nisi imperdiet lectus tincidunt vestibulum at ac elit. Nulla mattis nisl eu malesuada suscipit.
+\subsection{Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym}
 
-%----------------------------------------------------------------------------------------
-%	CODE LISTING EXAMPLE
-%----------------------------------------------------------------------------------------
+Pro zjištění kvality výsledků vyhledávání s ohledem na výskyt synonym a homonym jsme si vytvořili testovací dataset 10 článků z anglické Wikipedie... TO BE CONTINUED!!!
 
 \section{Diskuze}
 
-\lstinputlisting[
-	caption=Luftballons Perl Script., % Caption above the listing
-	label=lst:luftballons, % Label for referencing this listing
-	language=Perl, % Use Perl functions/syntax highlighting
-	frame=single, % Frame around the code listing
-	showstringspaces=false, % Don't put marks in string spaces
-	numbers=left, % Line numbers on left
-	numberstyle=\tiny, % Line numbers styling
-	]{luftballons.pl}
-
-%------------------------------------------------
-
-\subsection{How many luftballons will be output by the Listing \ref{lst:luftballons} above?}
-
-Aliquam arcu turpis, ultrices sed luctus ac, vehicula id metus. Morbi eu feugiat velit, et tempus augue. Proin ac mattis tortor. Donec tincidunt, ante rhoncus luctus semper, arcu lorem lobortis justo, nec convallis ante quam quis lectus. Aenean tincidunt sodales massa, et hendrerit tellus mattis ac. Sed non pretium nibh. Donec cursus maximus luctus. Vivamus lobortis eros et massa porta porttitor.
-
-%------------------------------------------------
-
-\subsection{Identify the regular expression in Listing \ref{lst:luftballons} and explain how it relates to the anti-war sentiments found in the rest of the script.}
-
-Fusce varius orci ac magna dapibus porttitor. In tempor leo a neque bibendum sollicitudin. Nulla pretium fermentum nisi, eget sodales magna facilisis eu. Praesent aliquet nulla ut bibendum lacinia. Donec vel mauris vulputate, commodo ligula ut, egestas orci. Suspendisse commodo odio sed hendrerit lobortis. Donec finibus eros erat, vel ornare enim mattis et.
-
-%----------------------------------------------------------------------------------------
 
 \section{Závěr}
 
