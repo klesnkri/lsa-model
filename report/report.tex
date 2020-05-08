@@ -146,6 +146,7 @@ Singulární rozklad nám matici $M_w$ rozloží následovně:
 	\begin{split}
 		M_w = U \cdot S \cdot V^T
 	\end{split}					
+\label{eq:svd}\
 \end{align}
 
 kde řádky matice $U$ jsou obrazy řádků matice $M_w$, sloupce matice $V$ jsou obrazy sloupců matice $M_w$ a matice $S$ obsahuje na diagonále \emph{singulární hodnoty (absolutní hodnoty vlastních čísel)} matice $M_w$ v sestupném pořadí. Z těchto matic získáme \emph{concept-by-document} matici $M_{cd}$ jako:
@@ -184,7 +185,7 @@ kde $M_{w_{:,j}}$ značí j-tý sloupec matice $M_w$.
 
 \bigskip
 
-Vektor $V_c$ poté pomocí \emph{kosinové podobnosti} porovnáme se sloupcovými vektory matice $M_{cd}$. Indexy nejpodobnějších sloupcových vektorů matice $M_{cd}$ pak vrátíme jako indexy nejpodobnějších dokumentů k dokumentu dotazu $d_j$.
+Vektor $V_c$ poté pomocí \emph{kosinové podobnosti} porovnáme se sloupcovými vektory matice $M_{cd}$. Indexy nejpodobnějších sloupcových vektorů matice $M_{cd}$ pak vrátíme jako indexy nejpodobnějších dokumentů k dokumentu dotazu $d_j$. Spolu s indexy vrátíme i samotnou hodnotu kosinové podobnosti.
 
 \section{Implementace}
 
@@ -200,17 +201,27 @@ Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footno
 
 \section{Příklad výstupu}
 
+\begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
+	\centering
+	\includegraphics[width=0.7\columnwidth]{output.png}
+	\caption{Příklad výstupu aplikace}
+	\label{output}
+\end{figure}
+
+Na obrázku \ref{output} je vidět konkrétní vstup a výstup naší aplikace. Zobrazí se název článku dotazu, jméno jeho autora a také samotný text článku. Naše aplikace dále uživateli nabídne seznam 10 nejpodobnějších článků i s určenou kosinovou podobností v procentech. Je vidět, že aplikace vrací víceméně přesně to, co bychom čekali. K článku o tom, že firma SpaceX vypustila do vesmíru raketu, vrátí články týkající se firmy SpaceX či raket.
+
 \section{Experimentální sekce}
 
 \subsection{Určení optimálního počtu konceptů}
 
 \begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
 	\centering
-	\includegraphics[width=0.5\columnwidth]{singular_values.png}
+	\includegraphics[width=0.7\columnwidth]{singular_values.png}
 	\caption{Důležitost konceptů}
+	\label{concepts}
 \end{figure}
 
-Vezmeme si singulární hodnoty, které nám vrátil singulární rozklad v rovnici 2.5. Vizualizujeme-li si, jak klesá poměr nejvyšší singulární hodnoty vůči zbylým singulárním hodnotám, vidíme z toho také, jak klesá důležitost konceptů v datasetu. Počet konceptů $k$ v naší aplikaci tedy podle tohoto grafu určíme jako 400.
+Vezmeme si singulární hodnoty, které nám vrátil singulární rozklad v rovnici \ref{eq:svd}. Vizualizujeme-li si v grafu \ref{concepts}, jak klesá poměr nejvyšší singulární hodnoty vůči zbylým singulárním hodnotám, vidíme z toho také, jak klesá důležitost konceptů v datasetu. Počet konceptů $k$ v naší aplikaci tedy podle tohoto grafu určíme jako 400.
 
 \subsection{Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym}
 
