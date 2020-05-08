@@ -66,8 +66,7 @@ V experimentální části projektu jsme se dále zaměřili na:
 	\item Určení optimálního počtu konceptů
 	\item Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym
 	\item Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze
-	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu...)
-	\item Jak se změní výsledky při použití jiného vzorce na výpočet vah termů
+	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu, použití jiného vzorce na výpočet vah termů...)
 \end{itemize}
 
 \bigskip 
@@ -197,7 +196,7 @@ Ukládání dat v projektu řešíme přes CSV soubory, ke kterým přistupujeme
 
 \bigskip
 
-Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footnote{https://flask.palletsprojects.com/en/1.1.x/} web serveru. Jako dataset v našem projektu používáme anglicky psané novinové články stažené z \emph{kaggle.com}\footnote{https://www.kaggle.com/snapcrack/all-the-news}. Dataset nepoužíváme celý, vybrali jsme z něj pouze 961 článků.
+Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footnote{https://flask.palletsprojects.com/en/1.1.x/} web serveru. Jako dataset v našem projektu používáme anglicky psané novinové články stažené z \emph{kaggle.com}\footnote{https://www.kaggle.com/snapcrack/all-the-news}. Dataset nepoužíváme celý, vybrali jsme z něj pouze 1000 článků.
 
 \section{Příklad výstupu}
 

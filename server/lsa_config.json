@@ -3,7 +3,7 @@
     "max_df": 1.0,
     "min_df": 1,
     "max_terms": 0,
-    "use_lemmatizer": false,
+    "use_lemmatizer": true,
     "remove_numbers": false,
     "keep_less_freq": false
   },
