@@ -149,7 +149,7 @@ Singulární rozklad nám matici $M_w$ rozloží následovně:
 	\end{split}					
 \end{align}
 
-kde řádky matice $U$ jsou obrazy řádků matice $M_w$, sloupce matice $V$ jsou obrazy sloupců matice $M_w$ a matice $S$ obsahuje na diagonále \emph{singular values (absolutní hodnoty vlastních čísel)} matice $M_w$ v sestupném pořadí. Z těchto matic získáme \emph{concept-by-document} matici $M_{cd}$ jako:
+kde řádky matice $U$ jsou obrazy řádků matice $M_w$, sloupce matice $V$ jsou obrazy sloupců matice $M_w$ a matice $S$ obsahuje na diagonále \emph{singulární hodnoty (absolutní hodnoty vlastních čísel)} matice $M_w$ v sestupném pořadí. Z těchto matic získáme \emph{concept-by-document} matici $M_{cd}$ jako:
 
 \begin{align}
 	\begin{split}
@@ -211,7 +211,7 @@ Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footno
 	\caption{Důležitost konceptů}
 \end{figure}
 
-Vezmeme si singular values, které nám vrátil singulární rozklad v rovnici 2.5. Vizualizujeme-li si, jak klesá poměr nejvyšší singular value vůči zbylým singular values, vidíme z toho také, jak klesá důležitost konceptů v datasetu. Počet konceptů $k$ v naší aplikaci tedy podle tohoto grafu určíme jako 400.
+Vezmeme si singulární hodnoty, které nám vrátil singulární rozklad v rovnici 2.5. Vizualizujeme-li si, jak klesá poměr nejvyšší singulární hodnoty vůči zbylým singulárním hodnotám, vidíme z toho také, jak klesá důležitost konceptů v datasetu. Počet konceptů $k$ v naší aplikaci tedy podle tohoto grafu určíme jako 400.
 
 \subsection{Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym}
 
