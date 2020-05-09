@@ -1,6 +1,7 @@
 import os.path
 import pandas as pd
-
+import csv
+import json
 
 def select_articles(count, output_file, seed=42):
     folder = 'raw_data'
@@ -13,8 +14,21 @@ def select_articles(count, output_file, seed=42):
     
     df.to_csv(output_file, header=True, index=False)
 
-    print('articles saved to', output_file)
+    # add articles containing homonyms and synonyms
+    csvfile = open(output_file, 'a')
+    writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    
+    file = open('homonyms_synonyms/articles.json')
 
+    data = json.load(file) 
+
+    for article in data['articles']: 
+        writer.writerow([article['title'], article['author'], article['url'], article['content'], article['id'], article['publication']])
+
+    # Closing file 
+    csvfile.close() 
+    
+    print('articles saved to', output_file)
 
 if __name__ == '__main__':
     import argparse
