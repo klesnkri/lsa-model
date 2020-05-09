@@ -10,7 +10,7 @@ def select_articles(count, output_file, seed=42):
     df = pd.concat((pd.read_csv(f, header=0) for f in files), ignore_index=True)
     df = df.sample(n=count, replace=False, random_state=seed)
     df = df[['title', 'author', 'url', 'content', 'id', 'publication']]
-
+    
     df.to_csv(output_file, header=True, index=False)
 
     print('articles saved to', output_file)

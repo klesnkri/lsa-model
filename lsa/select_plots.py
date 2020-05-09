@@ -41,7 +41,7 @@ def select_plots(output_file, min_year=1990, max_rows=1000, seed=42, randomize=T
     df = df.rename(columns={
         'Title': 'title',
         'Director': 'author',
-        'Wiki Page': 'link',
+        'Wiki Page': 'url',
         'Plot': 'content'
     })
 
