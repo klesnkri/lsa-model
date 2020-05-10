@@ -203,7 +203,7 @@ Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footno
 
 \begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
 	\centering
-	\includegraphics[width=0.7\columnwidth]{output.png}
+	\includegraphics[width=0.8\columnwidth]{output.png}
 	\caption{Příklad výstupu aplikace}
 	\label{output}
 \end{figure}
@@ -225,7 +225,43 @@ Vezmeme si singulární hodnoty, které nám vrátil singulární rozklad v rovn
 
 \subsection{Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym}
 
-Pro zjištění kvality výsledků vyhledávání s ohledem na výskyt synonym a homonym jsme si vytvořili testovací dataset 10 článků z anglické Wikipedie... TO BE CONTINUED!!!
+Pro zjištění kvality výsledků vyhledávání s ohledem na výskyt synonym a homonym jsme do datasetu přidali 4 články.
+
+\subsubsection{Synonyma}
+
+Jak si náš model poradí se synonymy jsme testovali na článcích \emph{"Silicon Valley’s favorite magician reimagines his act in the age of Zoom"} a \emph{"Leading NYC Illusionist Launches Virtual Magic Shows}. Testovali jsme tedy anglická synonyma \emph{illusionist} a \emph{magician}.
+
+\begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
+	\centering
+	\includegraphics[width=0.7\columnwidth]{synonyms_0.png}
+	\includegraphics[width=0.7\columnwidth]{synonyms_1.png}
+	\caption{Synonyma}
+	\label{synonyms}
+\end{figure}
+
+\bigskip
+
+Na obrázku \ref{synonyms} je vidět, že náš model synonyma v článcích identifikoval správně. V prvním článku se sice ani jednou přímo nevyskytuje slovo \emph{magician} a v druhém ani jednou slovo \emph{illusionist}, ale v obou se vyskytují slova se slovním záladem \emph{magic} nebo například slova \emph{show} a \emph{audience} a model tak správně články identifikoval jako podobné.
+
+\subsubsection{Homonyma}
+
+K testování jak si náš článek poradí s homonymy jsme použili články \emph{"Little Richard, rock 'n' roll pioneer, has died at 87"} a \emph{"Scientists found bacteria inside rocks — here’s what that could mean for life on Mars"}, které oba obsahují slovo \emph{rock} ovšem jednou ve významu skály a jednou ve významu rockového muzikanta.
+
+\begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
+	\centering
+	\includegraphics[width=0.7\columnwidth]{homonyms_0.png}
+	\includegraphics[width=0.7\columnwidth]{homonyms_1.png}
+	\caption{Homonyma}
+	\label{homonyms}
+\end{figure}
+
+\bigskip
+
+Na obrázku \ref{homonyms} je vidět že u prvního článku, týkajícího se vlivu objevu bakterie v podmořských skalách na možnost žvota na Marsu, si model poradil opravdu dobře a vrátil nám články týkající se vesmíru nebo přírody. Jediné co model spletlo je článek o Chrisi Rockovi, jehož příjmení, které se ve článku vyskytuje velmi často, jsme při předzpracování převedli na malá písmena na \emph{rock} a model tak neví, že se jedná o vlastní jméno.
+
+\bigskip
+
+U druhého článku týkajícího se smrti rockového hudebníka nám jako první vrátil velmi relevantní článek o jiném stárnoucím hudebníkovi. Jako druhý článek nám model opět vrátil článek o Chrisi Rockovi, jež je teď pro model velmi relevantní, jelikož je to článek o celebritě a obsahuje spoustu výskytů slova \emph{rock}. Třetí, čtvrtý a pátý článek jsou opět relevantní články o hudebnícíh, ale jako šestý článek už model vrátí článek o skále namísto o hudebnících. Je tedy vidět, že velmi relevantní články o huebnících model identifikuje správně jako nejpodobnější, u méně relevatních článků týkajících se hudebníků, hudby nebo celebrit už má model problém identifikovat, jestli jsou relevantnější tyto články nebo články o skalách. Velmi záleží na tom, kolik podobných slov se ve článcích vyskytuje.
 
 \section{Diskuze}
 
