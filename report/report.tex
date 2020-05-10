@@ -102,37 +102,37 @@ Z této zredukované matice poté již spočteme matici $M_w$. Pro výpočet vah
 
 \begin{align}
 	\begin{split}
-		w_{ij} = tf_{ij} \cdot idf_{ij}
+		\mathit{w_{ij} = tf_{ij} \cdot idf_{ij}}
 	\end{split}					
 \end{align}
 
-kde $tf_{ij}$ reprezentuje normalizovanou četnost termu $t_i$ v dokumentu $d_j$ a spočítá se podle vzorce\footnote{https://en.wikipedia.org/wiki/Tf\%E2\%80\%93idf} :
+kde $\mathit{tf_{ij}}$ reprezentuje normalizovanou četnost termu $t_i$ v dokumentu $d_j$ a spočítame ji podle vzorce\footnote{https://en.wikipedia.org/wiki/Tf\%E2\%80\%93idf} :
 
 \begin{align}
 	\begin{split}
-		tf_{ij} = \frac{f_{ij}}{nt_j}
+		\mathit{tf_{ij} = \frac{f_{ij}}{nt_j}}
 	\end{split}					
 \end{align}
 
-kde $f_{ij}$ je četnost výskytu termu $t_i$ v dokumentu $d_j$, kterou normalizujeme číslem $nt_j$ vyjadřujícím celkový počet termů v dokumentu $d_j$. V přednášových slidech je použita normalizace jiná, $tf_{ij}$ se tam počítá podle vzorce:
+kde $\mathit{f_{ij}}$ je četnost výskytu termu $t_i$ v dokumentu $d_j$, kterou normalizujeme číslem $\mathit{nt_j}$ vyjadřujícím celkový počet termů v dokumentu $d_j$. V přednášových slidech je použita normalizace jiná, $\mathit{tf_{ij}}$ se tam počítá podle vzorce:
 
 \begin{align}
 	\begin{split}
-		tf_{ij} = \frac{f_{ij}}{max_i\{f_{ij}\}}
+		\mathit{tf_{ij} = \frac{f_{ij}}{max_i\{f_{ij}\}}}
 	\end{split}					
 \end{align}
 
-kde $max_i\{f_{ij}\}$ vrací nejvyšší četnost termu $t_i$ přes celou kolekci dokumentů. Tento způsob normalizace nám vrací spíše horší výsledky, jejich porovnáním se zabýváme v experimentální části.
+kde $\mathit{max_i\{f_{ij}\}}$ vrací nejvyšší četnost termu $t_i$ přes celou kolekci dokumentů. Tento způsob normalizace nám vrací spíše horší výsledky, jejich porovnáním se zabýváme v experimentální části.
 
-$idf_{ij}$ reprezentuje převrácenou četnost $t_i$ ve všech dokumentech a spočítá se podle vzorce:
+$\mathit{idf_{ij}}$ reprezentuje převrácenou četnost $t_i$ ve všech dokumentech a spočítá se podle vzorce:
 
 \begin{align}
 	\begin{split}
-		idf_{ij} = \log_2 (\frac{n}{df_i})
+		\mathit{idf_{ij} = \log_2 (\frac{n}{df_i})}
 	\end{split}					
 \end{align}
 
-kde $n$ je celkový počet dokumentů a $df_i$ reprezentuje celkový počet dokumentů obsahujících term $t_i$.
+kde $n$ je celkový počet dokumentů a $\mathit{df_i}$ reprezentuje celkový počet dokumentů obsahujících term $t_i$.
 
 \subsection{Implementace LSI}
 
@@ -257,7 +257,7 @@ K testování jak si náš článek poradí s homonymy jsme použili články \e
 
 \bigskip
 
-Na obrázku \ref{homonyms} je vidět že u prvního článku, týkajícího se vlivu objevu bakterie v podmořských skalách na možnost žvota na Marsu, si model poradil opravdu dobře a vrátil nám články týkající se vesmíru nebo přírody. Jediné co model spletlo je článek o Chrisi Rockovi, jehož příjmení, které se ve článku vyskytuje velmi často, jsme při předzpracování převedli na malá písmena na \emph{rock} a model tak neví, že se jedná o vlastní jméno.
+Na obrázku \ref{homonyms} je vidět že u prvního článku, týkajícího se vlivu objevu bakterie v podmořských skalách na možnost žvota na Marsu, si model poradil opravdu dobře a vrátil nám články týkající se vesmíru nebo přírody. Jediné co model spletlo je článek o Chrisi Rockovi, jehož příjmení, které se ve článku vyskytuje velmi často, jsme při předzpracování převedli na malá písmena do tvaru \emph{rock} a model tak neví, že se jedná o vlastní jméno. I přes tento problém jsme se v naší aplikaci rozhodli všechna slova převádět na malá písmena. Kdybychom se rozhodli převádět na malá písmena pouze slova na začátcích vět a ostatní vlastní jména nechávali s velkým písmenem na začátku, identifikoval by nám model například slovo \emph{school} a slovo \emph{School} v názvu nějaké školy jako 2 rozdílná slova. Je tedy na zvážení autorů aplikace, jak k problému přistoupí.
 
 \bigskip
 
