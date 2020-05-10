@@ -18,7 +18,7 @@ def select_articles(count, output_file, seed=42):
     csvfile = open(output_file, 'a')
     writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     
-    file = open('homonyms_synonyms/articles.json')
+    file = open('data/homonyms_synonyms/articles.json')
 
     data = json.load(file) 
 
