@@ -40,8 +40,6 @@ def preprocess_docs(df, use_lemmatizer=True, remove_numbers=True):
                      Uses lemmatizer if True, otherwise uses stemmer.
     remove_numbers : bool
     """
-    preprocessed_docs = []
-
     # English stop words list
     stops = set(string.punctuation).union(set(stopwords.words('english')))
 
@@ -196,7 +194,7 @@ def cosine_similarity(x, y):
     return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
 
 
-def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None, min_sim=0):
+def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None):
     """Returns most similar (column) vectors to `i`-th vector in `arr`.
 
     Parameters
@@ -206,7 +204,6 @@ def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None, 
     df_query_projection : pd.DataFrame
     i : index of vector to be compared to
     n : return at most `n` vectors
-    min_sim : return only vectors at least this similar - @TODO - add functionality or remove parameter
     """
     
     src_vector = df_query_projection.fillna(0).to_numpy() @ (df_tf_idf.fillna(0).to_numpy())[:, i]

@@ -10,28 +10,18 @@ DATA_DIR = os.path.join(bp.root_path, 'data')
 LSA_CONFIG_FILE = 'lsa_config.json'
 LSA_CONFIG_PATH = os.path.join(bp.root_path, LSA_CONFIG_FILE)
 
-
-def get_words():
-    """Return words contained in tf-idf matrix after filtration - i.e. words used by LSA."""
-    lsa = LSA(DATA_DIR, CACHE_DIR)
-    df = lsa.df_tf_idf
-    words = df.index
-    return set(words)
+SERVER_MODE = os.environ.get('SERVER_MODE', 'dev')
+g_lsa = None
 
 
-@bp.app_template_filter('highlight')
-def highlight_words(text):
-    # disable @TODO: probably just remove
-    return text
-    # words = get_words()
-    # out = []
-    # for word in text.split(' '):
-    #     # @TODO - add stemming or something? currently doesn't match correctly
-    #     if word.lower() in words:
-    #         out.append(Markup('<b>') + word + Markup('</b>'))
-    #     else:
-    #         out.append(word)
-    # return Markup(' '.join(out))
+def get_lsa():
+    global g_lsa
+    if SERVER_MODE == 'deploy':
+        if g_lsa is None:
+            g_lsa = LSA(DATA_DIR, CACHE_DIR)
+        return g_lsa
+
+    return LSA(DATA_DIR, CACHE_DIR)
 
 
 @bp.app_template_filter('nl2p')
@@ -53,7 +43,7 @@ def maxlen(text, maxlen):
 
 @bp.route('/')
 def index():
-    lsa = LSA(DATA_DIR, CACHE_DIR)
+    lsa = get_lsa()
     df = lsa.df_data
     cols = ['author', 'title']
 
@@ -62,7 +52,7 @@ def index():
 
 @bp.route('/<int:article_id>')
 def article(article_id):
-    lsa = LSA(DATA_DIR, CACHE_DIR)
+    lsa = get_lsa()
     if article_id not in lsa.df_data.index:
         abort(404)
     
@@ -84,5 +74,5 @@ def display_config():
 
 @bp.route('/debug')
 def debug():
-    lsa = LSA(DATA_DIR, CACHE_DIR)
+    lsa = get_lsa()
     return '<br>'.join(lsa.df_tf_idf.index)
