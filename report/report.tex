@@ -66,12 +66,12 @@ V experimentální části projektu jsme se dále zaměřili na:
 	\item Určení optimálního počtu konceptů
 	\item Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym
 	\item Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze s ohledem na čas vykonání dotazu
-	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu, použití jiného vzorce na výpočet vah termů...)
+	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu, použití jiného vzorce na výpočet vah termů...)
 \end{itemize}
 
 \bigskip 
 
-Celý náš projekt je volně dostupný k vyzkoušení na \url{https://bi-vwm-lsi-demo.herokuapp.com/}.
+Celý náš projekt je volně dostupný k vyzkoušení na: \url{https://bi-vwm-lsi-demo.herokuapp.com/}.
 
 \section{Způsob řešení}
 
@@ -203,7 +203,7 @@ Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footno
 
 \begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
 	\centering
-	\includegraphics[width=0.8\columnwidth]{images/output.png}
+	\includegraphics[width=0.9\columnwidth]{images/output.png}
 	\caption{Příklad výstupu aplikace}
 	\label{output}
 \end{figure}
@@ -233,8 +233,8 @@ Jak si náš model poradí se synonymy jsme testovali na článcích \emph{"Sili
 
 \begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
 	\centering
-	\includegraphics[width=0.7\columnwidth]{images/synonyms_0.png}
-	\includegraphics[width=0.7\columnwidth]{images/synonyms_1.png}
+	\includegraphics[width=0.8\columnwidth]{images/synonyms_0.png}
+	\includegraphics[width=0.8\columnwidth]{images/synonyms_1.png}
 	\caption{Synonyma}
 	\label{synonyms}
 \end{figure}
@@ -249,15 +249,15 @@ K testování jak si náš článek poradí s homonymy jsme použili články \e
 
 \begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
 	\centering
-	\includegraphics[width=0.7\columnwidth]{images/homonyms_0.png}
-	\includegraphics[width=0.7\columnwidth]{images/homonyms_1.png}
+	\includegraphics[width=0.8\columnwidth]{images/homonyms_0.png}
+	\includegraphics[width=0.8\columnwidth]{images/homonyms_1.png}
 	\caption{Homonyma}
 	\label{homonyms}
 \end{figure}
 
 \bigskip
 
-Na obrázku \ref{homonyms} je vidět že u prvního článku, týkajícího se vlivu objevu bakterie v podmořských skalách na možnost žvota na Marsu, si model poradil opravdu dobře a vrátil nám články týkající se vesmíru nebo přírody. Jediné co model spletlo je článek o Chrisi Rockovi, jehož příjmení, které se ve článku vyskytuje velmi často, jsme při předzpracování převedli na malá písmena do tvaru \emph{rock} a model tak neví, že se jedná o vlastní jméno. I přes tento problém jsme se v naší aplikaci rozhodli všechna slova převádět na malá písmena. Kdybychom se rozhodli převádět na malá písmena pouze slova na začátcích vět a ostatní vlastní jména nechávali s velkým písmenem na začátku, identifikoval by nám model například slovo \emph{school} a slovo \emph{School} v názvu nějaké školy jako 2 rozdílná slova. Je tedy na zvážení autorů aplikace, jak k problému přistoupí.
+Na obrázku \ref{homonyms} je vidět, že u prvního článku, týkajícího se vlivu objevu bakterie v podmořských skalách na možnost žvota na Marsu, si model poradil opravdu dobře a vrátil nám články týkající se vesmíru nebo přírody. Jediné co model spletlo je článek o Chrisi Rockovi, jehož příjmení, které se ve článku vyskytuje velmi často, jsme při předzpracování převedli na malá písmena do tvaru \emph{rock} a model tak neví, že se jedná o vlastní jméno. I přes tento problém jsme se v naší aplikaci rozhodli všechna slova převádět na malá písmena. Kdybychom se rozhodli převádět na malá písmena pouze slova na začátcích vět a ostatní vlastní jména nechávali s velkým písmenem na začátku, identifikoval by nám model například slovo \emph{school} a slovo \emph{School} v názvu nějaké školy jako 2 rozdílná slova. Je tedy na zvážení autorů aplikace, jak k problému přistoupí.
 
 \bigskip
 
@@ -267,7 +267,19 @@ U druhého článku týkajícího se smrti rockového hudebníka nám jako prvn�
 
 Pro odsimulování sekvenčního průchodu databází nastavíme počet konceptů stejný jako počet dokumentů databáze. Toho docílíme tak, že v souboru \emph{server/lsa\_config.json} nastavíme parametr $k$ na 0.
 
-TODO
+\begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
+	\centering
+	\includegraphics[width=1\columnwidth]{images/measure_time.png}
+	\caption{Porovnání času vykonání dotazu při sekvenčním průchodu databáze}
+	\label{measure_time}
+\end{figure}
+
+\bigskip
+
+Na obrázku \ref{measure_time} je vidět, že při sekvenčním průchodu databází se čas vykonání dotazu zpomalí asi o
+0.05 sekund. Při spuštění Flask serveru a testování v prohlížeči je však rozdíl v rychlosti načítání stránky zobrazující obsah článku a 10 jemu nejpodobnějších článku mnohem výraznější, kolem 3 sekund.
+
+\subsection{Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu, použití jiného vzorce na výpočet vah termů...)}
 
 \section{Diskuze}
 
