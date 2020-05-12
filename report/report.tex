@@ -66,7 +66,7 @@ V experimentální části projektu jsme se dále zaměřili na:
 	\item Určení optimálního počtu konceptů
 	\item Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym
 	\item Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze s ohledem na čas vykonání dotazu
-	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu, použití jiného vzorce na výpočet vah termů...)
+	\item Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu, použití jiného vzorce pro výpočet vah termů)
 \end{itemize}
 
 \bigskip 
@@ -79,7 +79,7 @@ Celý náš projekt je volně dostupný k vyzkoušení na: \url{https://bi-vwm-l
 
 Jako první v naší aplikaci začínáme s preprocesingem dokumentů. Slova z jednotlivých dokumentů převedeme na malá písmena a odstraníme z nich nevýznamová slova a interpunkci. K identifikaci nevýznamových slov používáme seznam anglických nevýznamových slov. Jako parametr programu posíláme také, zda má z dokumentů odstranit i číslovky. Následně na zbylé termy aplikujeme \emph{stemming} či \emph{lemmatizaci}. Tím se snažíme slova, která mají stejný slovní základ, vyjádřit pouze jedním termem. Stemming to dělá pomocí algoritmu, kterým odsekává přípony a koncovky slova. Lemmatizace na to jde o něco chytřeji, podle kontextu slova se pokusí určit, o jaký slovní druh se jedná, a podle toho ho zkrátit.\footnote{\url{nlp.stanford.edu/IR-book/html/htmledition/stemming-and-lemmatization-1.html}} Porovnání jejich použití v programu se dále věnujeme v experimentální části.
 
-\subsection{Výpočet vah termů}
+\subsection{Výpočet vah termů}\label{subsec:term_weights}
 V aplikaci vytváříme matici $M_w$, která má v řádcích jednotlivé termy a ve sloupcích jejich váhy v jednotlivých dokumentech.
 
 \bigskip 
@@ -91,10 +91,6 @@ Začneme tím, že si vytvoříme matici počtu výskytů jednotlivých termů v
 	\item \emph{max\_terms} - maximální počet termů, které si v aplikaci necháme
 	\item \emph{keep\_less\_freq} - udává, zda si při výběru \emph{max\_terms} termů nechat ty nejméně či nejvíce často zastoupené v dokumentech  
 \end{itemize}
-
-\bigskip 
-
-Zkoumání vlivu změny jednotlivých parametrů na výsledek LSI se dále podrobněji věnujeme v experimentální části. V programu vždy nastavujeme \emph{min\_df} alespoň na 1, abychom odstranili termy nacházející se pouze v 1 dokumentu, které nám do LSI nepřidávají žádné užitečné informace. (pravda?)
 
 \bigskip
 
@@ -205,10 +201,10 @@ Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footno
 	\centering
 	\includegraphics[width=0.9\columnwidth]{images/output.png}
 	\caption{Příklad výstupu aplikace}
-	\label{output}
+	\label{fig:output}
 \end{figure}
 
-Na obrázku \ref{output} je vidět konkrétní vstup a výstup naší aplikace. Zobrazí se název článku dotazu, jméno jeho autora a také samotný text článku. Naše aplikace dále uživateli nabídne seznam 10 nejpodobnějších článků i s určenou kosinovou podobností v procentech. Je vidět, že aplikace vrací víceméně přesně to, co bychom čekali. K článku o tom, že firma SpaceX vypustila do vesmíru raketu, vrátí články týkající se firmy SpaceX či raket.
+Na obrázku \ref{fig:output} je vidět konkrétní vstup a výstup naší aplikace. Zobrazí se název článku dotazu, jméno jeho autora a také samotný text článku. Naše aplikace dále uživateli nabídne seznam 10 nejpodobnějších článků i s určenou kosinovou podobností v procentech. Je vidět, že aplikace vrací víceméně přesně to, co bychom čekali. Jako nejpodobnější vrátila téměř shodný článek taktéž informující, že firma SpaceX vypustila do vesmíru raketu. Další navrhované články se také týkají firmy SpaceX, vesmíru nebo businessu. 
 
 \section{Experimentální sekce}
 
@@ -218,10 +214,10 @@ Na obrázku \ref{output} je vidět konkrétní vstup a výstup naší aplikace. 
 	\centering
 	\includegraphics[width=0.7\columnwidth]{images/singular_values.png}
 	\caption{Důležitost konceptů}
-	\label{concepts}
+	\label{fig:concepts}
 \end{figure}
 
-Vezmeme si singulární hodnoty, které nám vrátil singulární rozklad v rovnici \ref{eq:svd}. Vizualizujeme-li si v grafu \ref{concepts}, jak klesá poměr nejvyšší singulární hodnoty vůči zbylým singulárním hodnotám, vidíme z toho také, jak klesá důležitost konceptů v datasetu. Počet konceptů $k$ v naší aplikaci tedy podle tohoto grafu určíme jako 400.
+Vezmeme si singulární hodnoty, které nám vrátil singulární rozklad v rovnici \ref{eq:svd}. Vizualizujeme-li si v grafu \ref{fig:concepts}, jak klesá poměr nejvyšší singulární hodnoty vůči zbylým singulárním hodnotám, vidíme z toho také, jak klesá důležitost konceptů v datasetu. Počet konceptů $k$ v naší aplikaci tedy podle tohoto grafu určíme jako 200.
 
 \subsection{Porovnání vlivu LSI na kvalitu výsledků vyhledávání s ohledem na výskyt synonym a homonym}
 
@@ -236,12 +232,12 @@ Jak si náš model poradí se synonymy jsme testovali na článcích \emph{"Sili
 	\includegraphics[width=0.8\columnwidth]{images/synonyms_0.png}
 	\includegraphics[width=0.8\columnwidth]{images/synonyms_1.png}
 	\caption{Synonyma}
-	\label{synonyms}
+	\label{fig:synonyms}
 \end{figure}
 
 \bigskip
 
-Na obrázku \ref{synonyms} je vidět, že náš model synonyma v článcích identifikoval správně. V prvním článku se sice ani jednou přímo nevyskytuje slovo \emph{magician} a v druhém ani jednou slovo \emph{illusionist}, ale v obou se vyskytují slova se slovním záladem \emph{magic} nebo například slova \emph{show} a \emph{audience} a model tak články správně identifikoval jako podobné.
+Na obrázku \ref{fig:synonyms} je vidět, že náš model synonyma v článcích identifikoval správně. V prvním článku se sice ani jednou přímo nevyskytuje slovo \emph{magician} a v druhém ani jednou slovo \emph{illusionist}, ale v obou se vyskytují slova se slovním záladem \emph{magic} nebo například slova \emph{show} a \emph{audience} a model tak články správně identifikoval jako podobné.
 
 \subsubsection{Homonyma}
 
@@ -252,16 +248,15 @@ K testování jak si náš článek poradí s homonymy jsme použili články \e
 	\includegraphics[width=0.8\columnwidth]{images/homonyms_0.png}
 	\includegraphics[width=0.8\columnwidth]{images/homonyms_1.png}
 	\caption{Homonyma}
-	\label{homonyms}
+	\label{fig:homonyms}
 \end{figure}
 
 \bigskip
 
-Na obrázku \ref{homonyms} je vidět, že u prvního článku, týkajícího se vlivu objevu bakterie v podmořských skalách na možnost žvota na Marsu, si model poradil opravdu dobře a vrátil nám články týkající se vesmíru nebo přírody. Jediné co model spletlo je článek o Chrisi Rockovi, jehož příjmení, které se ve článku vyskytuje velmi často, jsme při předzpracování převedli na malá písmena do tvaru \emph{rock} a model tak neví, že se jedná o vlastní jméno. I přes tento problém jsme se v naší aplikaci rozhodli všechna slova převádět na malá písmena. Kdybychom se rozhodli převádět na malá písmena pouze slova na začátcích vět a ostatní vlastní jména nechávali s velkým písmenem na začátku, identifikoval by nám model například slovo \emph{school} a slovo \emph{School} v názvu nějaké školy jako 2 rozdílná slova. Je tedy na zvážení autorů aplikace, jak k problému přistoupí.
-
+Na obrázku \ref{fig:homonyms} je vidět, že u prvního článku, týkajícího se vlivu objevu bakterie v podmořských skalách na možnost života na Marsu, si model poradil opravdu dobře a vrátil nám články týkající se vesmíru nebo přírody.
 \bigskip
 
-U druhého článku týkajícího se smrti rockového hudebníka nám jako první vrátil velmi relevantní článek o jiném stárnoucím hudebníkovi. Jako druhý článek nám model opět vrátil článek o Chrisi Rockovi, jež je teď pro model velmi relevantní, jelikož je to článek o celebritě a obsahuje spoustu výskytů slova \emph{rock}. Třetí, čtvrtý a pátý článek jsou opět relevantní články o hudebnícíh, ale jako šestý článek už model vrátí článek o skále namísto o hudebnících. Je tedy vidět, že velmi relevantní články o hudebnících model identifikuje správně jako nejpodobnější, u méně relevatních článků týkajících se hudebníků, hudby nebo celebrit už má model problém identifikovat, jestli jsou relevantnější tyto články nebo články o skalách. Velmi záleží na tom, kolik podobných slov se ve článcích vyskytuje.
+U druhého článku týkajícího se smrti rockového hudebníka nám model také velmi správně správně jako nejpodobnější vrátil články týkající se dalších mrtvých hudebníků. Dále vrátil také relevantní články o hudbě a celebritách.
 
 \subsection{Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze s ohledem na čas vykonání dotazu}
 
@@ -271,15 +266,48 @@ Pro odsimulování sekvenčního průchodu databází nastavíme počet koncept�
 	\centering
 	\includegraphics[width=1\columnwidth]{images/measure_time.png}
 	\caption{Porovnání času vykonání dotazu při sekvenčním průchodu databáze}
-	\label{measure_time}
+	\label{fig:measure_time}
 \end{figure}
 
 \bigskip
 
-Na obrázku \ref{measure_time} je vidět, že při sekvenčním průchodu databází se čas vykonání dotazu zpomalí asi o
-0.05 sekund. Při spuštění Flask serveru a testování v prohlížeči je však rozdíl v rychlosti načítání stránky zobrazující obsah článku a 10 jemu nejpodobnějších článku mnohem výraznější, kolem 3 sekund.
+Na obrázku \ref{fig:measure_time} je vidět, že při sekvenčním průchodu databází se čas vykonání dotazu zpomalí asi o
+0.05 sekund. Při testování v prohlížeči je však rozdíl v rychlosti načítání stránky zobrazující obsah článku a 10 jemu nejpodobnějších článku mnohem výraznější, kolem 4 sekund.
 
-\subsection{Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu, použití jiného vzorce na výpočet vah termů...)}
+\subsection{Vliv různých vnitřních parametrů na výkon algoritmu (změna počtu konceptů, změna počtu extrahovaných termů, použití lemmatizace namísto stemmingu, odstranění číslovek při preprocesingu, použití jiného vzorce na výpočet vah termů)}
+
+\begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
+	\centering
+	\includegraphics[width=1\columnwidth]{images/homonym_bad.png}
+	\caption{Špatné určení článku obsahujícího homonymum jako podobného}
+	\label{fig:homonym_bad}
+\end{figure}
+
+\subsubsection{Změna počtu konceptů}
+Při snížení počtu konceptů na 100 vrací model stále relevantní výsledky a také určování homonym a synonym funguje správně. Na obrázku \ref{fig:homonym_bad} je vidět, že při zvýšení počtu konceptů na 300 už model špatně určí jeden článek obsahující homonymum jako podobný. Tato chyba je se zvyšujícím se počtem konceptů čím dál častější.
+
+\subsubsection{Změna počtu extrahovaných termů}
+
+V naší aplikaci ve funkci na redukci termů (o které píšeme v části \ref{subsec:term_weights}) odstraňujeme pomocí parametru \emph{min\_df} pouze termy vyskytující se pouze v jednom dokumentu. Parametr \emph{max\_df} necháváme defultně nastavený na 1, po preprocesingu nemáme v našem datasetu termy vyskytující se v hodně dokumentech. Parametr \emph{max\_terms} také necháváme defaultně nastavený na 0. Uřednostňujeme nechat si v datasetu všechny důležité termy a mít přesnější výsledky před rychlejší dobou běhu.
+
+\subsubsection{Použití lemmatizace namísto stemmingu}
+
+\begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
+	\centering
+	\includegraphics[width=1\columnwidth]{images/preprocesing_time.png}
+	\caption{Čas preprocesingu při použití stemmingu versus při použití lemmatizace}
+	\label{fig:preprocesing_time}
+\end{figure}
+
+Na obrázku \ref{fig:preprocesing_time} je vidět, že při použití lemmatizace namísto stemmingu se čas preprocesingu více než zčtyřnásobí na téměř 30 sekund. Uděláme-li si graf důležitosti konceptů jako na obrázku \ref{fig:concepts} vyjde při použití stemmingu i lemmatizace úplně stejný. V naší aplikaci jsme se rozhodli používat lemmatizaci a upřednostnit tak přesnější převádění slov z dokumentů na jednotlivé termy na úkor delšího času preprocesingu.
+
+\subsubsection{Odstranění číslovek při preprocesingu}
+
+Číslovky z dokumentů jsme se v naší aplikaci rozhodli odstraňovat, jelikož nám pak aplikace vrací o něco lepší výstupy. Číslovky v našem datasetu novinových článků nejsou většinou pro podobnost moc relevantní spíše naopak.
+
+\subsubsection{Použití jiného vzorce pro výpočet vah termů}
+
+TODO
 
 \section{Diskuze}
 
