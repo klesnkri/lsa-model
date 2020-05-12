@@ -4,11 +4,11 @@
     "min_df": 1,
     "max_terms": 0,
     "use_lemmatizer": true,
-    "remove_numbers": false,
+    "remove_numbers": true,
     "keep_less_freq": false
   },
   "compute": {
-    "k": 400,
+    "k": 200,
     "customSVD": false
   }
 }
