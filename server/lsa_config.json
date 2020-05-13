@@ -6,7 +6,7 @@
     "use_lemmatizer": true,
     "remove_numbers": true,
     "keep_less_freq": false,
-    "first_normalization": false
+    "first_normalization": true
   },
   "compute": {
     "k": 200,
