@@ -125,15 +125,22 @@ def reduce_terms(df_frequency, max_df=1.0, min_df=1, max_terms=None, keep_less_f
     return df.drop('doc_apperance', axis=1)
 
 
-def get_tf_idf(df_reduced):
+def get_tf_idf(df_reduced,first_normalization=True):
     df = df_reduced.copy()
 
     df = df.drop('doc_frequency', axis=1)
-    # tf := word frequency / total frequency
-    df.loc['total_words'] = df.sum()
-    df = df / df.loc['total_words']
-    df = df.drop('total_words')
+    
+    # tf := word frequency in doc / total words in doc
+    if first_normalization:
+        df.loc['total_words'] = df.sum()
+        df = df / df.loc['total_words']
+        df = df.drop('total_words')
+    # tf := word frequency in doc / max word frequency in all docs
+    else:
+        df['max_freq'] = df.max(axis=1)
+        df = df.iloc[:, :-1].div(df['max_freq'], axis=0)
 
+    
     # idf := log ( len(all_documents) / len(documents_containing_word) )
     # doc frequency was already computed in previous step - reuse
     df['idf'] = np.log(1 / df_reduced['doc_frequency'])
@@ -221,7 +228,7 @@ def get_n_nearest(df_tf_idf, df_concept_by_doc, df_query_projection, i, n=None):
 
 
 def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=1, max_terms=0,
-               use_lemmatizer=False, remove_numbers=True, keep_less_freq=False):
+               use_lemmatizer=False, remove_numbers=True, keep_less_freq=False, first_normalization=True):
     """Calculate tf-idf for `data_files` and reduce word count based on arguments. Saves output inside `cache_dir`.
 
     Parameters
@@ -247,7 +254,7 @@ def preprocess(data_dir='data', cache_dir='cache', max_df=0.75, min_df=1, max_te
     df_frequency = get_term_by_document_frequency(df_words)
     df_reduced = reduce_terms(df_frequency, max_df=max_df, min_df=min_df, max_terms=max_terms,
                               keep_less_freq=keep_less_freq)
-    df_tf_idf = get_tf_idf(df_reduced)
+    df_tf_idf = get_tf_idf(df_reduced, first_normalization=first_normalization)
 
     out_file = os.path.join(cache_dir, TF_IDF_FILE)
     df_tf_idf.to_csv(out_file)

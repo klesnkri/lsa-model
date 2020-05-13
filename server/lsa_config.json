@@ -5,7 +5,8 @@
     "max_terms": 0,
     "use_lemmatizer": true,
     "remove_numbers": true,
-    "keep_less_freq": false
+    "keep_less_freq": false,
+    "first_normalization": false
   },
   "compute": {
     "k": 200,
