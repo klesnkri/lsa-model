@@ -86,10 +86,10 @@ V aplikaci vytváříme matici $M_w$, která má v řádcích jednotlivé termy 
 
 Začneme tím, že si vytvoříme matici počtu výskytů jednotlivých termů v jednotlivých dokumentech. Počet termů v této matici poté dále zredukujeme, abychom pracovali jen s těmi nejdůležitějšími. Funkci pro redukci termů posíláme následující parametry:
 \begin{itemize}
-	\item \emph{max\_df} - termy nacházející se ve více \% dokumentů, než udává číslo 100 * \emph{max\_df}, z matice odstraníme
-	\item \emph{min\_df} - termy nacházející se v méně nebo stejně dokumentech, než udává číslo \emph{min\_df}, z matice odstraníme
-	\item \emph{max\_terms} - maximální počet termů, které si v aplikaci necháme
-	\item \emph{keep\_less\_freq} - udává, zda si při výběru \emph{max\_terms} termů nechat ty nejméně či nejvíce často zastoupené v dokumentech  
+	\item $\mathit{max\_df}$ - termy nacházející se ve více \% dokumentů, než udává číslo $100 * \mathit{max\_df}$, z matice odstraníme
+	\item $\mathit{min\_df}$ - termy nacházející se v méně nebo stejně dokumentech, než udává číslo $\mathit{min\_df}$, z matice odstraníme
+	\item $\mathit{max\_terms}$ - maximální počet termů, které si v aplikaci necháme
+	\item $\mathit{keep\_less\_freq}$ - udává, zda si při výběru $\mathit{max\_terms}$ termů nechat ty nejméně či nejvíce často zastoupené v dokumentech  
 \end{itemize}
 
 \bigskip
@@ -107,7 +107,8 @@ kde $\mathit{tf_{ij}}$ reprezentuje normalizovanou četnost termu $t_i$ v dokume
 \begin{align}
 	\begin{split}
 		\mathit{tf_{ij} = \frac{f_{ij}}{nt_j}}
-	\end{split}					
+	\end{split}	
+	\label{eq:first_normalization}				
 \end{align}
 
 kde $\mathit{f_{ij}}$ je četnost výskytu termu $t_i$ v dokumentu $d_j$, kterou normalizujeme číslem $\mathit{nt_j}$ vyjadřujícím celkový počet termů v dokumentu $d_j$. V přednášových slidech je použita normalizace jiná, $\mathit{tf_{ij}}$ se tam počítá podle vzorce:
@@ -115,7 +116,8 @@ kde $\mathit{f_{ij}}$ je četnost výskytu termu $t_i$ v dokumentu $d_j$, kterou
 \begin{align}
 	\begin{split}
 		\mathit{tf_{ij} = \frac{f_{ij}}{max_i\{f_{ij}\}}}
-	\end{split}					
+	\end{split}		
+	\label{eq:second_normalization}			
 \end{align}
 
 kde $\mathit{max_i\{f_{ij}\}}$ vrací nejvyšší četnost termu $t_i$ přes celou kolekci dokumentů. Tento způsob normalizace nám vrací spíše horší výsledky, jejich porovnáním se zabýváme v experimentální části.
@@ -256,7 +258,7 @@ K testování jak si náš článek poradí s homonymy jsme použili články \e
 Na obrázku \ref{fig:homonyms} je vidět, že u prvního článku, týkajícího se vlivu objevu bakterie v podmořských skalách na možnost života na Marsu, si model poradil opravdu dobře a vrátil nám články týkající se vesmíru nebo přírody.
 \bigskip
 
-U druhého článku týkajícího se smrti rockového hudebníka nám model také velmi správně správně jako nejpodobnější vrátil články týkající se dalších mrtvých hudebníků. Dále vrátil také relevantní články o hudbě a celebritách.
+U druhého článku týkajícího se smrti rockového hudebníka nám model také velmi správně správně jako nejpodobnější vrátil články týkající se dalších mrtvých hudebníků. Dále vrátil další relevantní články o hudbě a celebritách.
 
 \subsection{Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze s ohledem na čas vykonání dotazu}
 
@@ -288,7 +290,7 @@ Při snížení počtu konceptů na 100 vrací model stále relevantní výsledk
 
 \subsubsection{Změna počtu extrahovaných termů}
 
-V naší aplikaci ve funkci na redukci termů (o které píšeme v části \ref{subsec:term_weights}) odstraňujeme pomocí parametru \emph{min\_df} pouze termy vyskytující se pouze v jednom dokumentu. Parametr \emph{max\_df} necháváme defultně nastavený na 1, po preprocesingu nemáme v našem datasetu termy vyskytující se v hodně dokumentech. Parametr \emph{max\_terms} také necháváme defaultně nastavený na 0. Uřednostňujeme nechat si v datasetu všechny důležité termy a mít přesnější výsledky před rychlejší dobou běhu.
+V naší aplikaci ve funkci na redukci termů (o které píšeme v části \ref{subsec:term_weights}) odstraňujeme pomocí parametru $\mathit{min\_df}$ pouze termy vyskytující se pouze v jednom dokumentu. Parametr $\mathit{max\_df}$ necháváme defultně nastavený na 1, po preprocesingu nemáme v našem datasetu termy vyskytující se v hodně dokumentech. Parametr $\mathit{max\_terms}$ také necháváme defaultně nastavený na 0. Upřednostňujeme nechat si v datasetu všechny důležité termy a mít přesnější výsledky před rychlejší dobou běhu.
 
 \subsubsection{Použití lemmatizace namísto stemmingu}
 
@@ -307,11 +309,21 @@ Na obrázku \ref{fig:preprocesing_time} je vidět, že při použití lemmatizac
 
 \subsubsection{Použití jiného vzorce pro výpočet vah termů}
 
-TODO
+\begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
+	\centering
+	\includegraphics[width=1\columnwidth]{images/output_bad.png}
+	\caption{Zhoršení výstupů při použití jiné metody normalizace četnosti termů}
+	\label{fig:output_bad}
+\end{figure}
+
+V aplikaci jsme se rozhodli při výpočtu \emph{tf\_idf} vah termů počítat normalizovanou četnost termů podle vzorce \ref{eq:first_normalization}. Chceme-li normalizovanou četnost termů počítat podle vzorce \ref{eq:second_normalization}, tak jak je uvedena v přednáškových slidech, nastavíme v souboru \emph{server/lsa\_config.json} parametr $\mathit{first\_normalization}$ na hodnotu $\mathit{False}$. Zjistili jsme, že při této změně má aplikace výrazně horší výstupy, jak je vidět na obrázku \ref{fig:output_bad}.
 
 \section{Diskuze}
 
+Aplikaci by určitě stálo za to vyzkoušet na větším datasetu obsahujícím více než 1000 článků. V reálné aplikaci by se také pro ukládání dat používala databáze, my jsme je však z důvodu zjednodušení ukládali do CSV souborů. Bylo by také zajímavé porovnat výsledky, které vrací náš LSI vektorový model, s nějakým jiným modelem (boolským, vektorovým...).
 
 \section{Závěr}
+
+V této práci jsme naimplementovali LSI vektorový model pro podobnostní vyhledávání v kolekci textových dokumentů. Model vrací relevantní výsledky. Práce pro nás byla přínosem, seznámili jsme se díky ní s velmi zajímavou problematikou prakticky využívající lineární algebru, objevili jsme jak velké možnosti nabízí jazyk Python pro práci s přirozeným jazykem a vyzkoušeli jsme si práci v týmu na větším projektu.
 
 \end{document}
