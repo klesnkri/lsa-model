@@ -86,7 +86,7 @@ V aplikaci vytváříme matici $M_w$, která má v řádcích jednotlivé termy 
 
 Začneme tím, že si vytvoříme matici počtu výskytů jednotlivých termů v jednotlivých dokumentech. Počet termů v této matici poté dále zredukujeme, abychom pracovali jen s těmi nejdůležitějšími. Funkci pro redukci termů posíláme následující parametry:
 \begin{itemize}
-	\item $\mathit{max\_df}$ - termy nacházející se ve více \% dokumentů, než udává číslo $100 * \mathit{max\_df}$, z matice odstraníme
+	\item $\mathit{max\_df}$ - termy nacházející se ve více \% dokumentů, než udává číslo $\mathit{max\_df}$, z matice odstraníme
 	\item $\mathit{min\_df}$ - termy nacházející se v méně nebo stejně dokumentech, než udává číslo $\mathit{min\_df}$, z matice odstraníme
 	\item $\mathit{max\_terms}$ - maximální počet termů, které si v aplikaci necháme
 	\item $\mathit{keep\_less\_freq}$ - udává, zda si při výběru $\mathit{max\_terms}$ termů nechat ty nejméně či nejvíce často zastoupené v dokumentech  
@@ -187,7 +187,7 @@ Vektor $V_c$ poté pomocí \emph{kosinové podobnosti} porovnáme se sloupcovým
 
 \section{Implementace}
 
-Celý projekt jsme programovali v jazyce \emph{Python}. Práci nám velmi usnadnila jeho knihovna \emph{NLTK}\footnote{\url{https://www.nltk.org/}} nabízející rozsáhlou funkcionalitu pro práci s přirozeným jazykem. Využili jsme například \emph{WordNetLemmatizer} pro lemmatizaci či \emph{SnowballStemmer} pro stemming. Dále jsme v programu hojně využívali Python knihovny \emph{pandas}\footnote{\url{https://pandas.pydata.org/}} a \emph{numpy}\footnote{\url{https://numpy.org/}}.
+Celý projekt jsme programovali v jazyce \emph{Python}. Práci nám velmi usnadnila knihovna \emph{NLTK}\footnote{\url{https://www.nltk.org/}} nabízející rozsáhlou funkcionalitu pro práci s přirozeným jazykem. Využili jsme například \emph{WordNetLemmatizer} pro lemmatizaci či \emph{SnowballStemmer} pro stemming. Dále jsme v programu hojně využívali Python knihovny \emph{pandas}\footnote{\url{https://pandas.pydata.org/}} a \emph{numpy}\footnote{\url{https://numpy.org/}}.
 
 \bigskip
 
@@ -206,7 +206,7 @@ Procházení článků vizualizujeme v prohlížeči pomocí \emph{Flask}\footno
 	\label{fig:output}
 \end{figure}
 
-Na obrázku \ref{fig:output} je vidět konkrétní vstup a výstup naší aplikace. Zobrazí se název článku dotazu, jméno jeho autora a také samotný text článku. Naše aplikace dále uživateli nabídne seznam 10 nejpodobnějších článků i s určenou kosinovou podobností v procentech. Je vidět, že aplikace vrací víceméně přesně to, co bychom čekali. Jako nejpodobnější vrátila téměř shodný článek taktéž informující, že firma SpaceX vypustila do vesmíru raketu. Další navrhované články se také týkají firmy SpaceX, vesmíru nebo businessu. 
+Na obrázku \ref{fig:output} je vidět konkrétní vstup a výstup naší aplikace. Zobrazí se název článku dotazu, jméno jeho autora a také samotný text článku. Naše aplikace dále uživateli nabídne seznam 10 nejpodobnějších článků i s určenou kosinovou převedenou na procenta. Je vidět, že aplikace vrací víceméně přesně to, co bychom čekali. Jako nejpodobnější vrátila téměř shodný článek taktéž informující, že firma SpaceX vypustila do vesmíru raketu. Další navrhované články se také týkají firmy SpaceX, vesmíru nebo businessu. 
 
 \section{Experimentální sekce}
 
@@ -262,7 +262,7 @@ U druhého článku týkajícího se smrti rockového hudebníka nám model tak�
 
 \subsection{Porovnání průchodu pomocí LSI vektorového modelu se sekvenčním průchodem databáze s ohledem na čas vykonání dotazu}
 
-Pro odsimulování sekvenčního průchodu databází nastavíme počet konceptů stejný jako počet dokumentů databáze. Toho docílíme tak, že v souboru \emph{server/lsa\_config.json} nastavíme parametr $k$ na 0.
+Pro odsimulování sekvenčního průchodu databází nastavíme počet konceptů stejný jako počet dokumentů databáze.
 
 \begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
 	\centering
@@ -290,7 +290,7 @@ Při snížení počtu konceptů na 100 vrací model stále relevantní výsledk
 
 \subsubsection{Změna počtu extrahovaných termů}
 
-V naší aplikaci ve funkci na redukci termů (o které píšeme v části \ref{subsec:term_weights}) odstraňujeme pomocí parametru $\mathit{min\_df}$ pouze termy vyskytující se pouze v jednom dokumentu. Parametr $\mathit{max\_df}$ necháváme defultně nastavený na 1, po preprocesingu nemáme v našem datasetu termy vyskytující se v hodně dokumentech. Parametr $\mathit{max\_terms}$ také necháváme defaultně nastavený na 0. Upřednostňujeme nechat si v datasetu všechny důležité termy a mít přesnější výsledky před rychlejší dobou běhu.
+V naší aplikaci ve funkci na redukci termů (o které píšeme v části \ref{subsec:term_weights}) odstraňujeme pomocí parametru $\mathit{min\_df}$ pouze termy vyskytující se pouze v jednom dokumentu. Parametr $\mathit{max\_df}$ necháváme defultně nastavený na 1, po preprocesingu nemáme v našem datasetu termy vyskytující se v hodně dokumentech. Parametr $\mathit{max\_terms}$ také necháváme defaultně nastavený na 0 (tedy bez omezení na konkrétní počet termů). Upřednostňujeme nechat si v datasetu všechny důležité termy a mít přesnější výsledky před rychlejší dobou běhu.
 
 \subsubsection{Použití lemmatizace namísto stemmingu}
 
@@ -316,7 +316,7 @@ Na obrázku \ref{fig:preprocesing_time} je vidět, že při použití lemmatizac
 	\label{fig:output_bad}
 \end{figure}
 
-V aplikaci jsme se rozhodli při výpočtu \emph{tf\_idf} vah termů počítat normalizovanou četnost termů podle vzorce \ref{eq:first_normalization}. Chceme-li normalizovanou četnost termů počítat podle vzorce \ref{eq:second_normalization}, tak jak je uvedena v přednáškových slidech, nastavíme v souboru \emph{server/lsa\_config.json} parametr $\mathit{first\_normalization}$ na hodnotu $\mathit{False}$. Zjistili jsme, že při této změně má aplikace výrazně horší výstupy, jak je vidět na obrázku \ref{fig:output_bad}.
+V aplikaci jsme se rozhodli při výpočtu \emph{tf\_idf} vah termů počítat normalizovanou četnost termů podle vzorce \ref{eq:first_normalization}. Aplikace lze však pomocí konfiguračního souboru \emph{server/lsa\_config.json} nastavit, aby četnost termů počítala podle vzorce \ref{eq:second_normalization}, tak jak je uveden v přednáškových slidech. Zjistili jsme, že při této změně má aplikace výrazně horší výstupy, jak je vidět na obrázku \ref{fig:output_bad}.
 
 \section{Diskuze}
 
