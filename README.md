@@ -1,4 +1,5 @@
-# LSA demo
+# LSA model
+Implementation of Latent semantic analysis model. Functionality visualized on finding similar articles in a database. Demo available on [https://bi-vwm-lsi-demo.herokuapp.com/0](https://bi-vwm-lsi-demo.herokuapp.com/).
 
 ## Installation
 
@@ -58,3 +59,8 @@ $ flask update # may take some time
 ├── setup.py                     # package setup file
 └── .gitignore
 ```
+## About
+Created as a semestral project for the [Searching Web and Multimedia Databases](http://bilakniha.cvut.cz/cs/predmet1449106.html) course at [FIT CTU](https://fit.cvut.cz/).
+
+## Authors
+David Mašek and Kristýna Klesnilová
