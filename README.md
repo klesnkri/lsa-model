@@ -1,5 +1,5 @@
 # LSA model
-Implementation of Latent semantic analysis model. Functionality visualized on finding similar articles in a database. Demo available on [https://bi-vwm-lsi-demo.herokuapp.com/0](https://bi-vwm-lsi-demo.herokuapp.com/).
+Implementation of Latent semantic analysis model. Functionality visualized on the task of finding similar articles in a database. Demo available on [https://bi-vwm-lsi-demo.herokuapp.com/0](https://bi-vwm-lsi-demo.herokuapp.com/).
 
 ## Authors
 David Mašek and Kristýna Klesnilová
